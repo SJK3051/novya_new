@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
-    Serializer for user registration
+    Serializer for user registration - handles both camelCase and snake_case
     """
     password = serializers.CharField(write_only=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True)
@@ -38,6 +38,27 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'username', 'email', 'firstname', 'lastname', 'password',
             'confirm_password', 'role', 'phonenumber'
         ]
+    
+    def to_internal_value(self, data):
+        """Convert camelCase frontend data to snake_case backend data"""
+        # Map camelCase to snake_case
+        field_mapping = {
+            'firstName': 'firstname',
+            'lastName': 'lastname',
+            'userName': 'username',
+            'phoneNumber': 'phonenumber',
+            'confirmPassword': 'confirm_password'
+        }
+        
+        # Convert the data
+        converted_data = {}
+        for key, value in data.items():
+            if key in field_mapping:
+                converted_data[field_mapping[key]] = value
+            else:
+                converted_data[key] = value
+        
+        return super().to_internal_value(converted_data)
     
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:

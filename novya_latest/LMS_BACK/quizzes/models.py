@@ -120,13 +120,13 @@ class QuizAnswer(models.Model):
 
 class MockTest(models.Model):
     """
-    Mock Test model matching new schema
+    Mock Test model matching provided schema
     """
     test_id = models.AutoField(primary_key=True)
     topic_id = models.ForeignKey(Topic, on_delete=models.CASCADE, db_column='topic_id')
     title = models.CharField(max_length=150)
     total_marks = models.IntegerField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True)  # Duration in minutes
+    duration = models.IntegerField(null=True, blank=True)  # in minutes
     
     def __str__(self):
         return f"{self.title} - {self.topic_id.topic_name if self.topic_id else 'No Topic'}"
@@ -161,13 +161,31 @@ class MockTestQuestion(models.Model):
 
 class MockTestAttempt(models.Model):
     """
-    Mock Test Attempt model matching new schema
+    Mock Test Attempt model matching quiz_attempt schema
     """
     attempt_id = models.AutoField(primary_key=True)
     test_id = models.ForeignKey(MockTest, on_delete=models.CASCADE, db_column='test_id')
     student_id = models.ForeignKey('authentication.StudentRegistration', on_delete=models.CASCADE, db_column='student_id')
     attempted_at = models.DateTimeField(auto_now_add=True)
     score = models.FloatField(null=True, blank=True)
+    
+    # Additional fields to match quiz_attempt table
+    answers_json = models.TextField(null=True, blank=True)
+    quiz_type = models.CharField(max_length=50, null=True, blank=True)
+    subject = models.CharField(max_length=100, null=True, blank=True)
+    chapter = models.CharField(max_length=100, null=True, blank=True)
+    topic = models.CharField(max_length=100, null=True, blank=True)
+    subtopic = models.CharField(max_length=100, null=True, blank=True)
+    class_name = models.CharField(max_length=50, null=True, blank=True)
+    difficulty_level = models.CharField(max_length=50, null=True, blank=True)
+    language = models.CharField(max_length=50, null=True, blank=True)
+    total_questions = models.IntegerField(null=True, blank=True)
+    correct_answers = models.IntegerField(null=True, blank=True)
+    wrong_answers = models.IntegerField(null=True, blank=True)
+    unanswered_questions = models.IntegerField(null=True, blank=True)
+    time_taken_seconds = models.IntegerField(null=True, blank=True)
+    completion_percentage = models.FloatField(null=True, blank=True)
+    mock_test_data_json = models.TextField(null=True, blank=True, db_column='mock_test_data_json')
     
     def __str__(self):
         return f"{self.student_id.firstname} - {self.test_id.title if self.test_id else 'Mock Test'}"
@@ -177,6 +195,25 @@ class MockTestAttempt(models.Model):
         verbose_name = 'Mock Test Attempt'
         verbose_name_plural = 'Mock Test Attempts'
         ordering = ['-attempted_at']
+
+
+class MockTestAnswer(models.Model):
+    """
+    Mock Test Answer model matching new schema
+    """
+    answer_id = models.AutoField(primary_key=True)
+    attempt_id = models.ForeignKey(MockTestAttempt, on_delete=models.CASCADE, db_column='attempt_id')
+    question_id = models.ForeignKey(MockTestQuestion, on_delete=models.CASCADE, db_column='question_id')
+    selected_option = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')])
+    is_correct = models.BooleanField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"Answer {self.answer_id}: {self.selected_option} ({'Correct' if self.is_correct else 'Incorrect'})"
+    
+    class Meta:
+        db_table = 'mock_test_answer'
+        verbose_name = 'Mock Test Answer'
+        verbose_name_plural = 'Mock Test Answers'
 
 
 # Legacy models for backward compatibility (if needed)

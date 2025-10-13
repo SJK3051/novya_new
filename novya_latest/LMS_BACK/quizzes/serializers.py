@@ -222,21 +222,21 @@ class QuizAttemptSubmissionSerializer(serializers.Serializer):
     """
     # Quiz metadata - matches frontend data structure
     quizType = serializers.CharField(required=False, default='ai_generated')
-    subject = serializers.CharField(max_length=100)
-    chapter = serializers.CharField(max_length=100, required=False, allow_blank=True)
-    topic = serializers.CharField(max_length=200, required=False, allow_blank=True)
-    subtopic = serializers.CharField(max_length=200)
-    className = serializers.CharField(max_length=50)
-    difficultyLevel = serializers.ChoiceField(choices=['simple', 'medium', 'hard'], default='simple')
-    language = serializers.CharField(max_length=10, default='English')
+    subject = serializers.CharField(max_length=100, required=False, allow_blank=True, allow_null=True)
+    chapter = serializers.CharField(max_length=100, required=False, allow_blank=True, allow_null=True)
+    topic = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
+    subtopic = serializers.CharField(max_length=200, required=False, allow_blank=True, allow_null=True)
+    className = serializers.CharField(max_length=50, required=False, allow_blank=True, allow_null=True)
+    difficultyLevel = serializers.ChoiceField(choices=['simple', 'medium', 'hard'], default='simple', required=False)
+    language = serializers.CharField(max_length=10, default='English', required=False)
     
     # Quiz results - matches frontend data structure
-    totalQuestions = serializers.IntegerField()
-    correctAnswers = serializers.IntegerField()
-    wrongAnswers = serializers.IntegerField()
-    unansweredQuestions = serializers.IntegerField()
-    timeTakenSeconds = serializers.IntegerField()
-    score = serializers.FloatField()
+    totalQuestions = serializers.IntegerField(required=False, default=0)
+    correctAnswers = serializers.IntegerField(required=False, default=0)
+    wrongAnswers = serializers.IntegerField(required=False, default=0)
+    unansweredQuestions = serializers.IntegerField(required=False, default=0)
+    timeTakenSeconds = serializers.IntegerField(required=False, default=0)
+    score = serializers.FloatField(required=False, default=0.0)
     
     # Quiz data - matches frontend data structure
     quizQuestions = serializers.ListField(child=serializers.DictField(), required=False)
@@ -419,3 +419,58 @@ class RecentQuizAttemptsSerializer(serializers.ModelSerializer):
             return 'Mock Test'
         else:
             return 'Quiz'
+
+
+class MockTestAttemptSubmissionSerializer(serializers.Serializer):
+    """
+    Serializer for submitting mock test attempts
+    """
+    # Mock test metadata - matches frontend data structure
+    testType = serializers.CharField(required=False, default='mock_test')
+    subject = serializers.CharField(max_length=100)
+    chapter = serializers.CharField(max_length=100, required=False, allow_blank=True)
+    topic = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    subtopic = serializers.CharField(max_length=200)
+    className = serializers.CharField(max_length=50)
+    difficultyLevel = serializers.ChoiceField(choices=['simple', 'medium', 'hard'], default='simple')
+    language = serializers.CharField(max_length=10, default='English')
+    
+    # Mock test results - matches frontend data structure
+    totalQuestions = serializers.IntegerField()
+    correctAnswers = serializers.IntegerField()
+    wrongAnswers = serializers.IntegerField()
+    unansweredQuestions = serializers.IntegerField()
+    timeTakenSeconds = serializers.IntegerField()
+    score = serializers.FloatField()
+    
+    # Mock test data - matches frontend data structure
+    testQuestions = serializers.ListField(child=serializers.DictField(), required=False)
+    userAnswers = serializers.ListField(child=serializers.CharField(), required=False)
+    
+    # Legacy fields for backward compatibility
+    test_data_json = serializers.CharField(required=False, allow_blank=True)
+    answers_json = serializers.CharField(required=False, allow_blank=True)
+    
+    def validate(self, data):
+        # Map frontend field names to backend field names
+        mapped_data = {
+            'test_type': data.get('testType', 'mock_test'),
+            'subject': data.get('subject'),
+            'chapter': data.get('chapter', ''),
+            'topic': data.get('topic', ''),
+            'subtopic': data.get('subtopic'),
+            'class_name': data.get('className'),
+            'difficulty_level': data.get('difficultyLevel', 'simple'),
+            'language': data.get('language', 'English'),
+            'total_questions': data.get('totalQuestions'),
+            'correct_answers': data.get('correctAnswers'),
+            'wrong_answers': data.get('wrongAnswers'),
+            'unanswered_questions': data.get('unansweredQuestions'),
+            'time_taken_seconds': data.get('timeTakenSeconds'),
+            'score': data.get('score'),
+            'test_data_json': data.get('test_data_json', ''),
+            'answers_json': data.get('answers_json', ''),
+            'test_questions': data.get('testQuestions', []),
+            'user_answers': data.get('userAnswers', [])
+        }
+        return mapped_data

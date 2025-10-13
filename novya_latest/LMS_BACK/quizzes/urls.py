@@ -26,6 +26,7 @@ urlpatterns = [
     
     # NEW: Enhanced Quiz Tracking System
     path('submit-attempt/', views.submit_quiz_attempt, name='submit_quiz_attempt'),
+    path('submit-mock-test/', views.submit_mock_test_attempt, name='submit_mock_test_attempt'),
     path('recent-attempts/', views.get_recent_quiz_attempts, name='recent_quiz_attempts'),
     path('performance/', views.get_student_performance, name='student_performance'),
     path('statistics/', views.get_quiz_statistics, name='quiz_statistics'),

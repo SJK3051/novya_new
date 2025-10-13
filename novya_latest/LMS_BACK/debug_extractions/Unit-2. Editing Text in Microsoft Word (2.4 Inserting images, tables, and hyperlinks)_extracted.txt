@@ -1,0 +1,77 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-2. Editing Text in Microsoft Word (2.4 Inserting images, tables, and hyperlinks).pdf
+==================================================
+
+--- PAGE 1 ---
+2.4 Inserting images, tables, and hyperlinks
+Q1. To insert an image in a document, you usually go to:
+a) Home → Font
+b) Insert → Picture
+c) Layout → Page Setup
+d) File → Save
+Correct answer: b) Insert → Picture
+Q2. Which option allows you to insert a table in a document?
+a) Insert → Table
+b) Home → Paragraph
+c) Review → Spelling
+d) Layout → Margins
+Correct answer: a) Insert → Table
+Q3. A hyperlink is used to:
+a) Change font style
+b) Link text or image to a website or document
+c) Align text
+d) Insert a table
+Correct answer: b) Link text or image to a website or
+document
+
+--- PAGE 2 ---
+Q4. Which tab usually contains options to add hyperlinks,
+images, and tables?
+a) Home
+b) Insert
+c) Layout
+d) Review
+Correct answer: b) Insert
+Q5. To resize an inserted image, you should:
+a) Drag the corner handles of the image
+b) Change the font
+c) Use bullets
+d) Add a hyperlink
+Correct answer: a) Drag the corner handles of the image
+Q6. To merge cells in a table, you need to:
+a) Select cells → Right-click → Merge Cells
+b) Click Insert → Table
+c) Click Home → Font
+d) Drag an image
+Correct answer: a) Select cells → Right-click → Merge Cells
+Q7. A hyperlink can be applied to:
+a) Text only
+b) Images only
+
+--- PAGE 3 ---
+c) Both text and images
+d) Tables only
+Correct answer: c) Both text and images
+Q8. Shortcut key to insert a hyperlink in most word
+processors is:
+a) Ctrl + N
+b) Ctrl + S
+c) Ctrl + K
+d) Ctrl + P
+Correct answer: c) Ctrl + K
+Q9. To add rows or columns in an existing table, you should:
+a) Select table → Right-click → Insert
+b) Insert → Picture
+c) Home → Font
+d) Layout → Margins
+Correct answer: a) Select table → Right-click → Insert
+Q10. Using images, tables, and hyperlinks in a document
+helps to:
+a) Make the document visually appealing and organized
+b) Change font size
+c) Increase page margins
+d) Align text only
+
+--- PAGE 4 ---
+Correct answer: a) Make the document visually appealing
+and organized
+

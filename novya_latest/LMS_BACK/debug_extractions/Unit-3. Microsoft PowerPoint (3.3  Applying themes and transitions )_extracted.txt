@@ -1,0 +1,78 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-3. Microsoft PowerPoint (3.3  Applying themes and transitions ).pdf
+==================================================
+
+--- PAGE 1 ---
+3.3 Applying themes and transitions
+Q1. What is a theme in a presentation?
+a) A pre-designed set of colors, fonts, and effects
+b) A table layout
+c) A type of image
+d) A hyperlink
+Correct answer: a) A pre-designed set of colors, fonts, and
+effects
+Q2. Applying a theme to a presentation helps to:
+a) Make the slides visually consistent
+b) Add bullet points
+c) Insert hyperlinks
+d) Resize images
+Correct answer: a) Make the slides visually consistent
+Q3. To apply a theme in most presentation software, you go
+to:
+a) Home → New Slide
+b) Design → Themes
+c) Insert → Table
+d) File → Save
+Correct answer: b) Design → Themes
+
+--- PAGE 2 ---
+Q4. A transition in a presentation is used to:
+a) Change the font of the text
+b) Animate how one slide moves to the next
+c) Insert a table
+d) Crop an image
+Correct answer: b) Animate how one slide moves to the next
+Q5. Which tab usually contains transition effects in
+presentation software?
+a) Home
+b) Insert
+c) Transitions
+d) Design
+Correct answer: c) Transitions
+Q6. Applying transitions helps to:
+a) Make the presentation dynamic and engaging
+b) Save the presentation faster
+c) Change font styles
+d) Insert hyperlinks
+Correct answer: a) Make the presentation dynamic and
+engaging
+Q7. To apply the same transition to all slides, you usually:
+a) Select all slides → Apply transition → Apply to All
+
+--- PAGE 3 ---
+b) Select first slide → Apply transition
+c) Insert → Table
+d) Home → Font
+Correct answer: a) Select all slides → Apply transition →
+Apply to All
+Q8. Examples of slide transitions include:
+a) Fade, Wipe, Push, Split
+b) Arial, Times New Roman, Calibri
+c) Bold, Italic, Underline
+d) Left, Right, Center
+Correct answer: a) Fade, Wipe, Push, Split
+Q9. Themes and transitions together help to:
+a) Enhance the visual appeal and flow of the presentation
+b) Save the presentation
+c) Change page layout
+d) Crop images
+Correct answer: a) Enhance the visual appeal and flow of the
+presentation
+Q10. Shortcut key to preview transitions on a slide is usually:
+a) F5
+b) Shift + F5
+c) Ctrl + P
+
+--- PAGE 4 ---
+d) Ctrl + S
+Correct answer: b) Shift + F5
+

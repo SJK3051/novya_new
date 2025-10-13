@@ -1,0 +1,75 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-5. Microsoft Access (5.4  Basic queries ).pdf
+==================================================
+
+--- PAGE 1 ---
+5.4 Basic queries
+📘 Basic Queries – MCQs
+Q1. What is a query in a database?
+a) A request to retrieve specific data from a table
+b) A table containing rows and columns
+c) A type of chart
+d) A font style
+Correct answer: a) A request to retrieve specific data from a
+table
+Q2. Which of the following is an example of a basic query?
+a) Show all students with marks above 80
+b) Insert a table
+c) Apply a slide layout
+d) Change font color
+Correct answer: a) Show all students with marks above 80
+Q3. Queries are used to:
+a) Retrieve, filter, or sort data based on criteria
+b) Format text
+c) Insert images
+d) Apply transitions
+Correct answer: a) Retrieve, filter, or sort data based on
+criteria
+
+--- PAGE 2 ---
+Q4. To create a simple query in most database software, you:
+a) Go to Create → Query → Design
+b) Insert → Table
+c) File → Save
+d) Home → Font
+Correct answer: a) Go to Create → Query → Design
+Q5. A query that retrieves all records from a table is called:
+a) Select query
+b) Update query
+c) Delete query
+d) Action query
+Correct answer: a) Select query
+Q6. Queries can be used to filter data based on:
+a) Specific conditions or criteria
+b) Font size
+c) Slide layout
+d) Image format
+Correct answer: a) Specific conditions or criteria
+Q7. Using queries helps to:
+a) Quickly find and analyze relevant data
+b) Change font color
+c) Create charts only
+
+--- PAGE 3 ---
+d) Apply transitions
+Correct answer: a) Quickly find and analyze relevant data
+Q8. Which symbol is commonly used in query criteria for
+“greater than”?
+a) >
+b) <
+c) =
+d) #
+Correct answer: a) >
+Q9. Queries can be saved and reused to:
+a) Save time when retrieving the same data multiple times
+b) Insert pictures
+c) Change slide layouts
+d) Format text
+Correct answer: a) Save time when retrieving the same data
+multiple times
+Q10. A query can display data from:
+a) One table or multiple related tables
+b) Only images
+c) Only charts
+d) Fonts only
+Correct answer: a) One table or multiple related tables
+

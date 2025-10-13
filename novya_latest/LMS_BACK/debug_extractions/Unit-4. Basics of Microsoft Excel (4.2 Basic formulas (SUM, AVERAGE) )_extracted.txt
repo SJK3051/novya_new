@@ -1,0 +1,71 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-4. Basics of Microsoft Excel (4.2 Basic formulas (SUM, AVERAGE) ).pdf
+==================================================
+
+--- PAGE 1 ---
+4.2 Basic formulas (SUM, AVERAGE)
+Q1. Which formula is used to add a range of cells?
+a) =SUM(A1:A5)
+b) =AVERAGE(A1:A5)
+c) =MAX(A1:A5)
+d) =MIN(A1:A5)
+Correct answer: a) =SUM(A1:A5)
+Q2. To find the average of a range of cells, you use:
+a) =SUM(A1:A5)
+b) =AVERAGE(A1:A5)
+c) =TOTAL(A1:A5)
+d) =COUNT(A1:A5)
+Correct answer: b) =AVERAGE(A1:A5)
+Q3. What does the formula =SUM(B1:B10) do?
+a) Adds all values in cells B1 to B10
+b) Finds the average of B1 to B10
+c) Counts the number of cells from B1 to B10
+d) Multiplies B1 to B10
+Correct answer: a) Adds all values in cells B1 to B10
+Q4. Formula =AVERAGE(C1:C5) calculates:
+a) Total sum of C1 to C5
+b) Maximum value in C1 to C5
+c) Average value of C1 to C5
+
+--- PAGE 2 ---
+d) Number of cells in C1 to C5
+Correct answer: c) Average value of C1 to C5
+Q5. Which symbol is used at the start of all formulas in Excel/Sheets?
+a) @
+b) =
+c) +
+d) #
+Correct answer: b) =
+Q6. To add specific cells only (like A1, A3, A5), which formula is
+correct?
+a) =SUM(A1:A5)
+b) =SUM(A1,A3,A5)
+c) =SUM(A1-A5)
+d) =AVERAGE(A1,A3,A5)
+Correct answer: b) =SUM(A1,A3,A5)
+Q7. Using =AVERAGE(B2,B4,B6) will:
+a) Add B2, B4, B6
+b) Find the average of B2, B4, and B6
+c) Multiply B2, B4, B6
+d) Count the number of cells
+Correct answer: b) Find the average of B2, B4, and B6
+Q8. The formula =SUM(A1:A5, C1:C5) will:
+a) Add only A1 to A5
+b) Add only C1 to C5
+
+--- PAGE 3 ---
+c) Add all values in both ranges A1:A5 and C1:C5
+d) Find the average of both ranges
+Correct answer: c) Add all values in both ranges A1:A5 and C1:C5
+Q9. SUM and AVERAGE are examples of:
+a) Functions
+b) Constants
+c) Formatting options
+d) Text entries
+Correct answer: a) Functions
+Q10. Why do we use formulas like SUM and AVERAGE?
+a) To calculate values automatically
+b) To insert images
+c) To format text
+d) To align paragraphs
+Correct answer: a) To calculate values automatically
+

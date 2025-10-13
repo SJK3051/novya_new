@@ -1,0 +1,75 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-2. Editing Text in Microsoft Word (2.1 Creating, saving, and opening documents ).pdf
+==================================================
+
+--- PAGE 1 ---
+Unit-2. Editing Text in Microsoft Word
+2.1 Creating, saving, and opening documents
+Q1. Which of the following is the first step to create a new
+document?
+a) Save the document
+b) Open an existing file
+c) Click on “New” or “Blank Document”
+d) Print the document
+Correct answer: c) Click on “New” or “Blank Document”
+Q2. To save a document for the first time, you should:
+a) Press Ctrl + O
+b) Press Ctrl + S or click “Save As”
+c) Close the document
+d) Print it
+Correct answer: b) Press Ctrl + S or click “Save As”
+Q3. Which option allows you to save a document with a different
+name or location?
+a) Save
+b) Save As
+c) Open
+d) Close
+Correct answer: b) Save As
+
+--- PAGE 2 ---
+Q4. What is the shortcut key to open an existing document?
+a) Ctrl + N
+b) Ctrl + O
+c) Ctrl + S
+d) Ctrl + P
+Correct answer: b) Ctrl + O
+Q5. Which file extension is commonly used for Microsoft Word
+documents?
+a) .txt
+b) .docx
+c) .xls
+d) .ppt
+Correct answer: b) .docx
+Q6. What happens if you close a document without saving it?
+a) The changes are lost
+b) The document is automatically saved
+c) The document is printed
+d) The file is duplicated
+Correct answer: a) The changes are lost
+Q7. To create a new document quickly, you can:
+a) Press Ctrl + N
+b) Press Ctrl + O
+c) Press Ctrl + S
+d) Press Ctrl + P
+Correct answer: a) Press Ctrl + N
+
+--- PAGE 3 ---
+Q8. Where can you usually find the “Save” and “Save As” options?
+a) File menu
+b) Home menu
+c) Insert menu
+d) View menu
+Correct answer: a) File menu
+Q9. If you want to open a document from a USB drive, you should:
+a) Click “New”
+b) Click “Open” and browse to the USB drive
+c) Press Ctrl + S
+d) Print it
+Correct answer: b) Click “Open” and browse to the USB drive
+Q10. Which of the following is the correct sequence for creating and
+saving a document?
+a) Open → Type → Save
+b) Save → Open → Type
+c) Print → Type → Save
+d) Close → Save → Open
+Correct answer: a) Open → Type → Save
+

@@ -1,0 +1,75 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-5. Microsoft Access (5.2  Creating a simple database ).pdf
+==================================================
+
+--- PAGE 1 ---
+5.2 Creating a simple database
+Perfect! Here’s a set of 10 MCQs on Creating a Simple Database with
+4 options each and Correct answer.
+📘 Creating a Simple Database – MCQs
+Q1. To create a new database, you usually:
+a) Open database software → File → New → Database
+b) Insert → Table
+c) Home → Font
+d) File → Save As
+Correct answer: a) Open database software → File → New →
+Database
+Q2. The first step in creating a database is usually:
+a) Decide the purpose of the database
+b) Insert a picture
+c) Format text
+d) Create a chart
+Correct answer: a) Decide the purpose of the database
+Q3. To create a table in a database, you usually:
+a) Create → Table
+b) Insert → Picture
+c) File → Save
+d) Home → Font
+Correct answer: a) Create → Table
+
+--- PAGE 2 ---
+Q4. Each column in a table should represent:
+a) A field (type of data)
+b) A record
+c) A chart
+d) A font style
+Correct answer: a) A field (type of data)
+Q5. Each row in a table represents:
+a) A record
+b) A field
+c) A chart
+d) A slide
+Correct answer: a) A record
+Q6. To save a database, you should:
+a) File → Save or Ctrl + S
+b) Insert → Table
+c) Home → Font
+d) Layout → Page Setup
+Correct answer: a) File → Save or Ctrl + S
+Q7. A primary key is used to:
+a) Uniquely identify each record in a table
+b) Change font style
+c) Insert a chart
+d) Format text
+Correct answer: a) Uniquely identify each record in a table
+
+--- PAGE 3 ---
+Q8. When creating a database, it is important to:
+a) Plan the tables and fields carefully
+b) Change font color
+c) Insert pictures
+d) Apply slide transitions
+Correct answer: a) Plan the tables and fields carefully
+Q9. Which of the following can be a field in a student database?
+a) Name
+b) Roll Number
+c) Date of Birth
+d) All of the above
+Correct answer: d) All of the above
+Q10. Creating a simple database helps to:
+a) Organize information for easy access and management
+b) Format text
+c) Insert charts
+d) Apply slide layouts
+Correct answer: a) Organize information for easy access and
+management
+

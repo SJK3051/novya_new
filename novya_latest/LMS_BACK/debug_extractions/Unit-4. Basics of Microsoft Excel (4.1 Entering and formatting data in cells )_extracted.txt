@@ -1,0 +1,73 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-4. Basics of Microsoft Excel (4.1 Entering and formatting data in cells ).pdf
+==================================================
+
+--- PAGE 1 ---
+Unit-4. Basics of Microsoft Excel
+4.1 Entering and formatting data in cells
+Q1. To enter data into a cell, you should:
+a) Click the cell and start typing
+b) Click Insert → Table
+c) Click Home → Font
+d) Click File → Save
+Correct answer: a) Click the cell and start typing
+Q2. To edit data in a cell, you can:
+a) Double-click the cell or select it and type new data
+b) Insert → Picture
+c) Home → Font
+d) File → Save
+Correct answer: a) Double-click the cell or select it and type new
+data
+Q3. To change the font style of cell data, you should go to:
+a) Home → Font group
+b) Insert → Table
+c) Layout → Page Setup
+d) Review → Spelling
+Correct answer: a) Home → Font group
+
+--- PAGE 2 ---
+Q4. To change the font size of cell data, you should use:
+a) Font size option in Home → Font group
+b) Insert → Picture
+c) Page Layout → Margins
+d) File → Save
+Correct answer: a) Font size option in Home → Font group
+Q5. To make cell text bold, which shortcut key can you use?
+a) Ctrl + I
+b) Ctrl + B
+c) Ctrl + U
+d) Ctrl + S
+Correct answer: b) Ctrl + B
+Q6. To change the text color in a cell, you should:
+a) Home → Font → Font Color
+b) Insert → Picture
+c) Page Layout → Margins
+d) Review → Spelling
+Correct answer: a) Home → Font → Font Color
+Q7. To center-align data in a cell, you use:
+a) Home → Alignment → Center
+b) Home → Font → Bold
+c) Insert → Table
+d) Layout → Margins
+Correct answer: a) Home → Alignment → Center
+
+--- PAGE 3 ---
+Q8. To fill multiple cells with the same data, you can:
+a) Type in the first cell → Drag the fill handle across the other cells
+b) Use Insert → Picture
+c) Change font color
+d) Align text
+Correct answer: a) Type in the first cell → Drag the fill handle across
+the other cells
+Q9. Shortcut key to copy cell data is:
+a) Ctrl + V
+b) Ctrl + C
+c) Ctrl + X
+d) Ctrl + Z
+Correct answer: b) Ctrl + C
+Q10. Formatting data in cells helps to:
+a) Make data readable and visually appealing
+b) Save the spreadsheet
+c) Insert hyperlinks
+d) Print the document
+Correct answer: a) Make data readable and visually appealing
+

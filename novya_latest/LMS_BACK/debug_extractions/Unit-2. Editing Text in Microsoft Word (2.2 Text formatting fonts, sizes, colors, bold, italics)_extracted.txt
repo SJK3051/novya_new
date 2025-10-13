@@ -1,0 +1,70 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-2. Editing Text in Microsoft Word (2.2 Text formatting fonts, sizes, colors, bold, italics).pdf
+==================================================
+
+--- PAGE 1 ---
+2.2 Text formatting: fonts, sizes, colors, bold, italics
+Q1. Which option is used to change the font style in a document?
+a) Font size
+b) Font type
+c) Bold
+d) Italics
+Correct answer: b) Font type
+Q2. To make text bold, which shortcut key can be used?
+a) Ctrl + I
+b) Ctrl + B
+c) Ctrl + U
+d) Ctrl + S
+Correct answer: b) Ctrl + B
+Q3. To make text italic, which shortcut key is used?
+a) Ctrl + I
+b) Ctrl + B
+c) Ctrl + U
+d) Ctrl + A
+Correct answer: a) Ctrl + I
+Q4. Changing the size of the text is done using:
+a) Font color
+b) Font size
+c) Bold
+
+--- PAGE 2 ---
+d) Italics
+Correct answer: b) Font size
+Q5. Which option changes the color of the text?
+a) Highlight
+b) Font color
+c) Bold
+d) Italics
+Correct answer: b) Font color
+Q6. Underline text can be applied using:
+a) Ctrl + B
+b) Ctrl + I
+c) Ctrl + U
+d) Ctrl + S
+Correct answer: c) Ctrl + U
+Q7. If you want to increase the size of a heading, you should change:
+a) Font color
+b) Font size
+c) Bold
+d) Italics
+Correct answer: b) Font size
+Q8. Which of these is an example of a font style?
+a) 12 pt
+b) Arial
+c) Red
+
+--- PAGE 3 ---
+d) Bold
+Correct answer: b) Arial
+Q9. Applying bold and italics together can be done by:
+a) Ctrl + B then Ctrl + I
+b) Ctrl + U then Ctrl + S
+c) Ctrl + P then Ctrl + I
+d) Ctrl + A then Ctrl + B
+Correct answer: a) Ctrl + B then Ctrl + I
+Q10. Changing the color of the text for emphasis helps to:
+a) Make the document readable
+b) Highlight important points
+c) Save the document
+d) Print the document
+Correct answer: b) Highlight important points
+

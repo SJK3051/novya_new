@@ -1,0 +1,75 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-5. Microsoft Access (5.1 Understanding databases and tables ).pdf
+==================================================
+
+--- PAGE 1 ---
+Unit-5. Microsoft Access
+5.1 Understanding databases and tables
+Perfect! Here’s a set of 10 MCQs on Understanding Databases and
+Tables with 4 options each and Correct answer.
+📘 Understanding Databases and Tables – MCQs
+Q1. What is a database?
+a) A collection of organized data
+b) A type of spreadsheet
+c) A font style
+d) A presentation tool
+Correct answer: a) A collection of organized data
+Q2. A table in a database is used to:
+a) Store data in rows and columns
+b) Create a chart
+c) Format text
+d) Insert an image
+Correct answer: a) Store data in rows and columns
+Q3. Each row in a table is called a:
+a) Field
+b) Record
+c) Column
+
+--- PAGE 2 ---
+d) Cell
+Correct answer: b) Record
+Q4. Each column in a table is called a:
+a) Field
+b) Record
+c) Row
+d) Cell
+Correct answer: a) Field
+Q5. Databases are useful for:
+a) Storing, organizing, and retrieving large amounts of data
+b) Formatting paragraphs
+c) Creating slides
+d) Drawing charts only
+Correct answer: a) Storing, organizing, and retrieving large amounts
+of data
+Q6. A primary key in a table is used to:
+a) Uniquely identify each record
+b) Sort data alphabetically
+c) Insert images
+d) Create charts
+Correct answer: a) Uniquely identify each record
+Q7. A relationship in a database connects:
+a) Two or more tables based on common fields
+b) Rows within the same table
+
+--- PAGE 3 ---
+c) Cells only
+d) Charts to slides
+Correct answer: a) Two or more tables based on common fields
+Q8. A field name describes:
+a) The type of data stored in a column
+b) The row number
+c) The spreadsheet font
+d) The slide layout
+Correct answer: a) The type of data stored in a column
+Q9. Which of the following is an example of a database?
+a) Library management system
+b) Microsoft Word document
+c) PowerPoint slide
+d) Paint drawing
+Correct answer: a) Library management system
+Q10. Databases are preferred over spreadsheets when:
+a) Handling large amounts of structured data
+b) Creating charts only
+c) Formatting text
+d) Printing documents
+Correct answer: a) Handling large amounts of structured data
+

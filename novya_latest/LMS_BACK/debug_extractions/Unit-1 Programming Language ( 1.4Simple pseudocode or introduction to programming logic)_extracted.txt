@@ -1,0 +1,73 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-1 Programming Language ( 1.4Simple pseudocode or introduction to programming logic).pdf
+==================================================
+
+--- PAGE 1 ---
+1.4 Simple pseudocode or introduction to programming logic
+Q1. What is pseudocode?
+a) A programming language
+b) A way of writing the logic of a program in simple English
+c) Machine code
+d) HTML code
+Correct answer: b) A way of writing the logic of a program in simple
+English
+Q2. Pseudocode helps programmers to:
+a) Compile code
+b) Design algorithms before coding
+c) Run programs faster
+d) Debug hardware
+Correct answer: b) Design algorithms before coding
+Q3. Which symbol is commonly used for assignment in pseudocode?
+a) =
+b) ==
+c) :
+d) ->
+Correct answer: a) =
+Q4. In programming logic, a condition is used to:
+a) Store data
+b) Make decisions
+c) Repeat statements
+
+--- PAGE 2 ---
+d) Display output
+Correct answer: b) Make decisions
+Q5. Which of the following is an example of pseudocode for adding
+two numbers?
+a) sum = a + b
+b) sum ++ a b
+c) a + b = sum
+d) sum = add(a, b)
+Correct answer: a) sum = a + b
+Q6. A loop in programming logic is used to:
+a) Execute a block of code repeatedly
+b) Stop the program
+c) Store values in memory
+d) Make decisions
+Correct answer: a) Execute a block of code repeatedly
+Q7. Which statement shows a decision-making structure in
+pseudocode?
+a) IF score >= 50 THEN
+b) sum = a + b
+c) PRINT “Hello”
+d) total = 0
+Correct answer: a) IF score >= 50 THEN
+Q8. What is an algorithm?
+a) A programming language
+
+--- PAGE 3 ---
+b) Step-by-step procedure to solve a problem
+c) A type of computer
+d) A loop in code
+Correct answer: b) Step-by-step procedure to solve a problem
+Q9. In pseudocode, PRINT is used to:
+a) Get input from the user
+b) Display output to the screen
+c) Perform addition
+d) Compare values
+Correct answer: b) Display output to the screen
+Q10. Pseudocode is useful because:
+a) It can be executed directly on a computer
+b) It helps plan the program logic before coding
+c) It replaces programming languages
+d) It is only used in AI
+Correct answer: b) It helps plan the program logic before coding
+

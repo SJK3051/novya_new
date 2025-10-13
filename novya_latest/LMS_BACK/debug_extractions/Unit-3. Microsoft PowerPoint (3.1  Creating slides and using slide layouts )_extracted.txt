@@ -1,0 +1,73 @@
+Extracted text from: E:\cursornov\novya_latest\LMS_BACK\media\quiz_pdfs\class7\computer\Unit-3. Microsoft PowerPoint (3.1  Creating slides and using slide layouts ).pdf
+==================================================
+
+--- PAGE 1 ---
+Unit-3. Microsoft PowerPoint
+3.1 Creating slides and using slide layouts
+Q1. To create a new slide in presentation software, you usually go to:
+a) Home → New Slide
+b) Insert → Picture
+c) Layout → Font
+d) File → Save
+Correct answer: a) Home → New Slide
+Q2. Slide layouts help to:
+a) Change the color of text
+b) Organize content like titles, text, and images
+c) Save the presentation
+d) Insert a hyperlink
+Correct answer: b) Organize content like titles, text, and images
+Q3. Which of the following is a common slide layout?
+a) Title Slide
+b) Blank Slide
+c) Title and Content
+d) All of the above
+Correct answer: d) All of the above
+Q4. To change the layout of an existing slide, you should:
+a) Right-click on the slide → Layout → Choose layout
+
+--- PAGE 2 ---
+b) Click Insert → Table
+c) Click File → Save As
+d) Drag the slide to the left
+Correct answer: a) Right-click on the slide → Layout → Choose layout
+Q5. A title slide is usually used for:
+a) Adding images
+b) Displaying the presentation’s title and subtitle
+c) Writing content lists
+d) Adding tables
+Correct answer: b) Displaying the presentation’s title and subtitle
+Q6. Which layout is most suitable for adding bullet points or text
+content?
+a) Title Slide
+b) Title and Content
+c) Blank Slide
+d) Comparison Slide
+Correct answer: b) Title and Content
+Q7. To duplicate a slide, you can:
+a) Right-click on the slide → Duplicate Slide
+b) Insert → New Slide
+c) Layout → Choose layout
+d) File → Save
+Correct answer: a) Right-click on the slide → Duplicate Slide
+
+--- PAGE 3 ---
+Q8. A blank slide layout is used when:
+a) You want a slide with no predefined placeholders
+b) Adding bullet points
+c) Adding a chart
+d) Writing the title
+Correct answer: a) You want a slide with no predefined placeholders
+Q9. Changing slide layouts can help to:
+a) Improve content arrangement and visual appeal
+b) Save the presentation
+c) Add hyperlinks
+d) Change font style only
+Correct answer: a) Improve content arrangement and visual appeal
+Q10. Shortcut key to create a new slide in most presentation
+software is:
+a) Ctrl + N
+b) Ctrl + M
+c) Ctrl + S
+d) Ctrl + P
+Correct answer: b) Ctrl + M
+

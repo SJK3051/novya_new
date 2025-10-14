@@ -27,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     """
-    Serializer for user registration - handles both camelCase and snake_case
+    Serializer for user registration
     """
     password = serializers.CharField(write_only=True, validators=[validate_password])
     confirm_password = serializers.CharField(write_only=True)
@@ -39,27 +39,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'confirm_password', 'role', 'phonenumber'
         ]
     
-    def to_internal_value(self, data):
-        """Convert camelCase frontend data to snake_case backend data"""
-        # Map camelCase to snake_case
-        field_mapping = {
-            'firstName': 'firstname',
-            'lastName': 'lastname',
-            'userName': 'username',
-            'phoneNumber': 'phonenumber',
-            'confirmPassword': 'confirm_password'
-        }
-        
-        # Convert the data
-        converted_data = {}
-        for key, value in data.items():
-            if key in field_mapping:
-                converted_data[field_mapping[key]] = value
-            else:
-                converted_data[key] = value
-        
-        return super().to_internal_value(converted_data)
-    
     def validate(self, attrs):
         if attrs['password'] != attrs['confirm_password']:
             raise serializers.ValidationError("Passwords don't match")
@@ -67,9 +46,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         validated_data.pop('confirm_password')
-        # Remove first_name and last_name if they exist (they're not in our User model)
-        validated_data.pop('first_name', None)
-        validated_data.pop('last_name', None)
         user = User.objects.create_user(**validated_data)
         return user
 

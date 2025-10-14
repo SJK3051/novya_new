@@ -497,18 +497,12 @@ def submit_mock_test_logic(request, validated_data, student_reg):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.AllowAny])  # Temporarily allow any for testing
+@permission_classes([permissions.IsAuthenticated])
 def submit_quiz_attempt(request):
     """
     Submit a quiz attempt (for AI-generated quizzes) or mock test
     """
     import json
-    
-    # Temporarily ignore authentication for testing
-    # This allows frontend submissions even with invalid tokens
-    # Force the user to be anonymous to bypass authentication
-    from django.contrib.auth.models import AnonymousUser
-    request.user = AnonymousUser()
     
     # Log incoming request data for debugging
     print(f"📥 Received submission request:")
@@ -520,17 +514,15 @@ def submit_quiz_attempt(request):
         # Get student registration
         student_reg = get_student_registration(request.user)
         if not student_reg:
-            # For testing without authentication, use the first available student
-            student_reg = StudentRegistration.objects.first()
-        if not student_reg:
             return Response(
-                    {'error': 'No students found in database'}, 
+                {'error': 'Student registration not found'}, 
                 status=status.HTTP_404_NOT_FOUND
             )
         
         validated_data = serializer.validated_data
         
         # Check if this is a mock test submission
+        # Note: serializer converts quizType to quiz_type
         if validated_data.get('quiz_type') == 'mock_test':
             # Route to mock test submission handler
             return submit_mock_test_logic(request, validated_data, student_reg)
@@ -672,7 +664,7 @@ def submit_quiz_attempt(request):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.AllowAny])  # Temporarily allow any for testing
+@permission_classes([permissions.IsAuthenticated])
 def submit_mock_test_attempt(request):
     """
     Submit a mock test attempt (for AI-generated mock tests)
@@ -684,13 +676,10 @@ def submit_mock_test_attempt(request):
         # Get student registration
         student_reg = get_student_registration(request.user)
         if not student_reg:
-            # For testing without authentication, use the first available student
-            student_reg = StudentRegistration.objects.first()
-            if not student_reg:
-                return Response(
-                    {'error': 'No students found in database'}, 
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            return Response(
+                {'error': 'Student registration not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         
         validated_data = serializer.validated_data
         
@@ -812,7 +801,7 @@ def submit_mock_test_attempt(request):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.AllowAny])  # Temporarily allow any for testing
+@permission_classes([permissions.IsAuthenticated])
 def get_recent_quiz_attempts(request):
     """
     Get recent quiz and mock test attempts for the logged-in student
@@ -880,7 +869,7 @@ def get_recent_quiz_attempts(request):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.AllowAny])  # Temporarily allow any for testing
+@permission_classes([permissions.IsAuthenticated])
 def get_student_performance(request):
     """
     Get student performance statistics from actual quiz and mock test attempts
@@ -888,13 +877,7 @@ def get_student_performance(request):
     # Get student registration
     student_reg = get_student_registration(request.user)
     if not student_reg:
-        # For testing without authentication, use the first available student
-        student_reg = StudentRegistration.objects.first()
-        if not student_reg:
-            return Response(
-                {'error': 'No students found in database'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+        return Response({'error': 'Student registration not found'}, status=status.HTTP_404_NOT_FOUND)
     
     # Get all quiz attempts and mock test attempts for this student
     quiz_attempts = QuizAttempt.objects.filter(student_id=student_reg)
@@ -908,11 +891,15 @@ def get_student_performance(request):
     total_questions_answered = sum(attempt.total_questions for attempt in quiz_attempts)
     total_correct_answers = sum(attempt.correct_answers for attempt in quiz_attempts)
     
-    # Calculate overall average score (including both quiz and mock test scores)
-    all_scores = []
-    all_scores.extend([attempt.score for attempt in quiz_attempts if attempt.score])
-    all_scores.extend([attempt.score for attempt in mock_test_attempts if attempt.score])
+    # Calculate separate average scores for quizzes and mock tests
+    quiz_scores = [attempt.score for attempt in quiz_attempts if attempt.score]
+    mock_test_scores = [attempt.score for attempt in mock_test_attempts if attempt.score]
     
+    quiz_average_score = sum(quiz_scores) / len(quiz_scores) if quiz_scores else 0
+    mock_test_average_score = sum(mock_test_scores) / len(mock_test_scores) if mock_test_scores else 0
+    
+    # Calculate overall average score (including both quiz and mock test scores)
+    all_scores = quiz_scores + mock_test_scores
     if all_scores:
         overall_average_score = sum(all_scores) / len(all_scores)
     else:
@@ -1019,6 +1006,10 @@ def get_student_performance(request):
         else:
             difficulty_performance[difficulty]['average_score'] = 0
     
+    # Calculate mock test specific metrics
+    mock_test_questions_answered = sum(attempt.total_questions for attempt in mock_test_attempts)
+    mock_test_correct_answers = sum(attempt.correct_answers for attempt in mock_test_attempts)
+    
     performance_data = {
         'total_quizzes_attempted': total_quizzes_attempted,
         'total_mock_tests_attempted': total_mock_tests_attempted,
@@ -1027,6 +1018,11 @@ def get_student_performance(request):
         'total_correct_answers': total_correct_answers,
         'overall_average_score': round(overall_average_score, 2),
         'accuracy_percentage': round((total_correct_answers / total_questions_answered * 100) if total_questions_answered > 0 else 0, 2),
+        # Separate quiz and mock test metrics
+        'quiz_average_score': round(quiz_average_score, 2),
+        'mock_test_average_score': round(mock_test_average_score, 2),
+        'mock_test_questions_answered': mock_test_questions_answered,
+        'mock_test_correct_answers': mock_test_correct_answers,
         'subject_wise_performance': subject_performance,
         'class_wise_performance': class_performance,
         'difficulty_wise_performance': difficulty_performance
@@ -1036,7 +1032,7 @@ def get_student_performance(request):
 
 
 @api_view(['GET'])
-@permission_classes([permissions.AllowAny])  # Temporarily allow any for testing
+@permission_classes([permissions.IsAuthenticated])
 def get_quiz_statistics(request):
     """
     Get detailed quiz and mock test statistics for the student
@@ -1046,13 +1042,7 @@ def get_quiz_statistics(request):
     # Get student registration
     student_reg = get_student_registration(student)
     if not student_reg:
-        # For testing without authentication, use the first available student
-        student_reg = StudentRegistration.objects.first()
-        if not student_reg:
-            return Response(
-                {'error': 'No students found in database'}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+        return Response({'error': 'Student registration not found'}, status=status.HTTP_404_NOT_FOUND)
     
     # Get all quiz and mock test attempts
     quiz_attempts = QuizAttempt.objects.filter(student_id=student_reg)

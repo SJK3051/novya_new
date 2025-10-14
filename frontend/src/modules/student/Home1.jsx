@@ -2045,7 +2045,7 @@ import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getQuizStatistics } from '../../utils/quizTracking';
+import { getStudentPerformance } from '../../utils/quizTracking';
 import './Home1.css';
 
 const Home1 = () => {
@@ -2160,40 +2160,55 @@ const Home1 = () => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const statistics = await getQuizStatistics();
-        console.log('🔍 Debug - Quiz statistics:', statistics);
+        console.log('🔍 Debug - Home page fetching performance data...');
+        const performanceData = await getStudentPerformance();
+        console.log('🔍 Debug - Performance data received:', performanceData);
         
-        if (statistics) {
-          setQuizData(statistics.quiz || {});
-          setMockTestData(statistics.mock_test || {});
+        if (performanceData) {
+          const quizAvg = performanceData.quiz_average_score || 0;
+          const mockTestAvg = performanceData.mock_test_average_score || 0;
+          
+          console.log('🔍 Debug - Quiz average:', quizAvg);
+          console.log('🔍 Debug - Mock test average:', mockTestAvg);
+          
+          setQuizData({ average_score: quizAvg });
+          setMockTestData({ average_score: mockTestAvg });
           
           // Update learning stats with real data
           const updatedStats = [...statsByClass[activeClass]];
+          console.log('🔍 Debug - Original stats:', updatedStats);
           
           // Update "Average Grade" to "Quiz Average" with real quiz data
           const quizAverageIndex = updatedStats.findIndex(stat => stat.label === t('dashboard.stats.averageGrade'));
-          if (quizAverageIndex !== -1 && statistics.quiz) {
+          console.log('🔍 Debug - Quiz average index:', quizAverageIndex);
+          if (quizAverageIndex !== -1) {
             updatedStats[quizAverageIndex] = {
               ...updatedStats[quizAverageIndex],
               label: 'Quiz Average',
-              value: Math.round(statistics.quiz.average_score || 0),
+              value: Math.round(quizAvg * 10) / 10, // Round to 1 decimal place
               icon: 'chart-line'
             };
+            console.log('🔍 Debug - Updated quiz stat:', updatedStats[quizAverageIndex]);
           }
           
           // Update "Assignments Due" to "Mock Test Average" with real mock test data
           const mockTestAverageIndex = updatedStats.findIndex(stat => stat.label === t('dashboard.stats.assignmentsDue'));
-          if (mockTestAverageIndex !== -1 && statistics.mock_test) {
+          console.log('🔍 Debug - Mock test average index:', mockTestAverageIndex);
+          if (mockTestAverageIndex !== -1) {
             updatedStats[mockTestAverageIndex] = {
               ...updatedStats[mockTestAverageIndex],
               label: 'Mock Test Average',
-              value: Math.round(statistics.mock_test.average_score || 0),
+              value: Math.round(mockTestAvg * 10) / 10, // Round to 1 decimal place
               icon: 'clock',
               max: 100
             };
+            console.log('🔍 Debug - Updated mock test stat:', updatedStats[mockTestAverageIndex]);
           }
           
+          console.log('🔍 Debug - Final updated stats:', updatedStats);
           setLearningStats(updatedStats);
+        } else {
+          console.log('🔍 Debug - No performance data received');
         }
       } catch (error) {
         console.error('❌ Error fetching quiz statistics:', error);
@@ -2201,6 +2216,25 @@ const Home1 = () => {
     };
 
     fetchQuizData();
+    
+    // Refetch data when window regains focus (user returns to tab)
+    const handleFocus = () => {
+      console.log('🔄 Window focused - refetching performance data...');
+      fetchQuizData();
+    };
+    
+    // Also refetch data every 30 seconds to ensure it's up to date
+    const intervalId = setInterval(() => {
+      console.log('🔄 Auto-refresh - refetching performance data...');
+      fetchQuizData();
+    }, 30000);
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
+    };
   }, [activeClass, t]);
 
   useEffect(() => {

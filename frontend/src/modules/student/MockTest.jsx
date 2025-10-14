@@ -372,34 +372,54 @@ function MockTest() {
         // Prepare mock test data for submission
         const mockTestData = {
           quizType: 'mock_test',
-          subject: selectedSubject,
-          chapter: selectedChapter,
-          topic: selectedChapter, // Using chapter as topic
-          subtopic: `${selectedSubject} - ${selectedChapter}`,
-          className: selectedClass,
+          subject: selectedSubject || 'Unknown',
+          chapter: selectedChapter || 'Unknown',
+          topic: selectedChapter || 'Unknown', // Using chapter as topic
+          subtopic: `${selectedSubject || 'Unknown'} - ${selectedChapter || 'Unknown'}`,
+          className: selectedClass || 'Unknown',
           difficultyLevel: 'medium', // Mock tests are typically medium difficulty
-          language: selectedLanguage,
-          totalQuestions: quizStats.totalQuestions,
-          correctAnswers: quizStats.correctAnswers,
-          wrongAnswers: quizStats.wrongAnswers,
-          unansweredQuestions: quizStats.unansweredQuestions,
-          timeTakenSeconds: timeTakenSeconds,
-          score: quizStats.score,
-          quizQuestions: quiz,
-          userAnswers: userAnswers
+          language: selectedLanguage || 'English',
+          totalQuestions: quizStats.totalQuestions || 0,
+          correctAnswers: quizStats.correctAnswers || 0,
+          wrongAnswers: quizStats.wrongAnswers || 0,
+          unansweredQuestions: quizStats.unansweredQuestions || 0,
+          timeTakenSeconds: timeTakenSeconds || 0,
+          score: quizStats.score || 0,
+          quizQuestions: quiz || [], // Send actual quiz data
+          userAnswers: (userAnswers || []).filter(answer => answer !== null) // Filter out null answers
         };
         
         // Submit to backend
-        await submitQuizAttempt(mockTestData);
-        console.log('Mock test attempt submitted successfully');
+        console.log('📤 Submitting mock test attempt to backend...', mockTestData);
+        console.log('🔍 Debug - User token exists:', !!localStorage.getItem('userToken'));
+        console.log('🔍 Debug - Token preview:', localStorage.getItem('userToken') ? localStorage.getItem('userToken').substring(0, 50) + '...' : 'No token');
+        
+        const submitResponse = await submitQuizAttempt(mockTestData);
+        console.log('✅ Mock test attempt submitted successfully!', submitResponse);
         
         // Update local mock test results (existing functionality)
         updateMockTestResults(score, quiz.length, selectedClass, selectedSubject, selectedChapter);
         
       } catch (error) {
-        console.error('Error submitting mock test attempt:', error);
+        console.error('❌ Error submitting mock test attempt:', error);
+        console.error('❌ Error details:', error.message);
+        console.error('❌ Stack trace:', error.stack);
+        console.error('❌ Error response:', error.response?.data);
+        console.error('❌ Error status:', error.response?.status);
+        
         // Still update local results even if backend submission fails
         updateMockTestResults(score, quiz.length, selectedClass, selectedSubject, selectedChapter);
+        
+        // Show more specific error to user
+        const errorMessage = error.response?.status === 401 
+          ? 'Authentication failed. Please log in again.'
+          : error.response?.status === 403
+          ? 'Access denied. Please check your permissions.'
+          : error.response?.status >= 500
+          ? 'Server error. Please try again later.'
+          : 'Warning: Mock test results saved locally, but could not sync to server. Please check your connection.';
+        
+        alert(errorMessage);
       } finally {
         exitFullScreen();
       }

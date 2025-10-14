@@ -121,6 +121,18 @@ const Career = () => {
     };
 
     fetchQuizData();
+    
+    // Refetch data when window regains focus (user returns to tab)
+    const handleFocus = () => {
+      console.log('🔄 Window focused - refetching quiz data...');
+      fetchQuizData();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
  
   const [animatedStats, setAnimatedStats] = useState({
@@ -184,7 +196,7 @@ const Career = () => {
  
   // Calculate dynamic metrics from API data
   const getDynamicQuizMetrics = () => {
-    if (!quizStatisticsData) {
+    if (!quizPerformanceData) {
       return {
         totalQuizzes: quizResults.totalQuizzes || 0,
         averageScore: parseFloat(quizAverage) || 0,
@@ -192,21 +204,28 @@ const Career = () => {
       };
     }
     
-    // Get quiz data from the correct location in statistics
-    const quizData = quizStatisticsData.quiz || {};
-    const quizAttempts = quizData.total_attempts || 0;
-    const quizScore = quizData.average_score || 0;
-    const quizQuestions = quizData.total_questions || 0;
+    // Get quiz data from performance API
+    const totalQuizzes = quizPerformanceData.total_quizzes_attempted || 0;
+    const averageScore = quizPerformanceData.quiz_average_score || 0;
+    const totalQuestions = quizPerformanceData.total_questions_answered || 0;
+    
+    // Debug logging
+    console.log('🔍 Quiz Metrics Debug:', {
+      totalQuizzes,
+      averageScore,
+      totalQuestions,
+      rawData: quizPerformanceData
+    });
     
     return {
-      totalQuizzes: quizAttempts,
-      averageScore: quizScore,
-      totalQuestions: quizQuestions
+      totalQuizzes: totalQuizzes,
+      averageScore: averageScore,
+      totalQuestions: totalQuestions
     };
   };
 
   const getDynamicMockTestMetrics = () => {
-    if (!quizStatisticsData) {
+    if (!quizPerformanceData) {
       return {
         totalTests: mockTestResults.totalTests || 0,
         averageScore: parseFloat(mockAverage) || 0,
@@ -214,16 +233,23 @@ const Career = () => {
       };
     }
     
-    // Get mock test data from the correct location in statistics
-    const mockTestData = quizStatisticsData.mock_test || {};
-    const mockTestAttempts = mockTestData.total_attempts || 0;
-    const mockTestScore = mockTestData.average_score || 0;
-    const mockTestQuestions = mockTestData.total_questions || 0;
+    // Get mock test data from performance API
+    const totalTests = quizPerformanceData.total_mock_tests_attempted || 0;
+    const averageScore = quizPerformanceData.mock_test_average_score || 0;
+    const totalQuestions = quizPerformanceData.mock_test_questions_answered || 0;
+    
+    // Debug logging
+    console.log('🔍 Mock Test Metrics Debug:', {
+      totalTests,
+      averageScore,
+      totalQuestions,
+      rawData: quizPerformanceData
+    });
     
     return {
-      totalTests: mockTestAttempts,
-      averageScore: mockTestScore,
-      totalQuestions: mockTestQuestions
+      totalTests: totalTests,
+      averageScore: averageScore,
+      totalQuestions: totalQuestions
     };
   };
 

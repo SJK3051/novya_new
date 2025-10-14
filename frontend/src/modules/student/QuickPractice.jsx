@@ -174,34 +174,39 @@ function Quiz() {
         // Prepare quiz data for submission
         const quizData = {
           quizType: 'ai_generated',
-          subject: selectedSubject,
+          subject: selectedSubject || 'Unknown',
           chapter: '', // Not available in current structure
-          topic: selectedSubject, // Using subject as topic
-          subtopic: selectedSubtopic,
-          className: selectedClass,
+          topic: selectedSubject || 'Unknown', // Using subject as topic
+          subtopic: selectedSubtopic || 'Unknown',
+          className: selectedClass || 'Unknown',
           difficultyLevel: 'simple', // Default for now
-          language: selectedLanguage,
-          totalQuestions: quizStats.totalQuestions,
-          correctAnswers: quizStats.correctAnswers,
-          wrongAnswers: quizStats.wrongAnswers,
-          unansweredQuestions: quizStats.unansweredQuestions,
-          timeTakenSeconds: timeTakenSeconds,
-          score: quizStats.score,
-          quizQuestions: quiz,
-          userAnswers: userAnswers
+          language: selectedLanguage || 'English',
+          totalQuestions: quizStats.totalQuestions || 0,
+          correctAnswers: quizStats.correctAnswers || 0,
+          wrongAnswers: quizStats.wrongAnswers || 0,
+          unansweredQuestions: quizStats.unansweredQuestions || 0,
+          timeTakenSeconds: timeTakenSeconds || 0,
+          score: quizStats.score || 0,
+          quizQuestions: quiz || [], // Send actual quiz data
+          userAnswers: (userAnswers || []).filter(answer => answer !== null) // Filter out null answers
         };
         
         // Submit to backend
-        await submitQuizAttempt(quizData);
-        console.log('Quiz attempt submitted successfully');
+        console.log('📤 Submitting quiz attempt to backend...', quizData);
+        const submitResponse = await submitQuizAttempt(quizData);
+        console.log('✅ Quiz attempt submitted successfully!', submitResponse);
         
         // Update local quiz results (existing functionality)
         updateQuizResults(score, quiz.length, currentLevel, selectedClass, selectedSubject, selectedSubtopic);
         
       } catch (error) {
-        console.error('Error submitting quiz attempt:', error);
+        console.error('❌ Error submitting quiz attempt:', error);
+        console.error('❌ Error details:', error.message);
+        console.error('❌ Stack trace:', error.stack);
         // Still update local results even if backend submission fails
         updateQuizResults(score, quiz.length, currentLevel, selectedClass, selectedSubject, selectedSubtopic);
+        // Show error to user
+        alert('Warning: Quiz results saved locally, but could not sync to server. Please check your connection.');
       } finally {
         exitFullScreen();
       }

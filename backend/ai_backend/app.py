@@ -1932,6 +1932,24 @@ def get_mock_subjects(class_name: str):
         raise HTTPException(status_code=400, detail="Invalid class")
     return JSONResponse(content={"subjects": list(subjects.keys())})
 
+@app.get("/quick-practice")
+def get_quick_practice():
+    """
+    Temporary endpoint for quick practice - returns mock data similar to mock_subjects
+    """
+    logger.info("Fetching quick practice data")
+    
+    # Return mock data similar to what frontend expects
+    return JSONResponse(content={
+        "message": "Quick Practice endpoint is working!",
+        "status": "success",
+        "data": {
+            "available_classes": list(CHAPTERS_SIMPLE.keys()),
+            "subjects": ["Computers", "English", "Mathematics", "Science", "History", "Geography", "Civics", "Economics"],
+            "quick_practice_available": True
+        }
+    })
+
 @app.get("/mock_chapters")
 def get_mock_chapters(class_name: str, subject: str):
     logger.info(f"Fetching chapters for class: {class_name}, subject: {subject}")

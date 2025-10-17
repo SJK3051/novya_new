@@ -24,6 +24,41 @@ const UserDetailsPage = () => {
       console.log('🔍 Debug - User role:', userRole);
       console.log('🔍 Debug - User token exists:', !!userToken);
       
+      // Only clear cache if it's very old (older than 30 minutes) or if there's no meaningful data
+      const now = Date.now();
+      const cacheKey = userRole === "student" ? "studentDataLastFetch" : "parentDataLastFetch";
+      const lastFetch = localStorage.getItem(cacheKey);
+      const shouldClearCache = !lastFetch || (now - parseInt(lastFetch)) > 30 * 60 * 1000; // 30 minutes
+      
+      // Check if existing data has meaningful content
+      let existingData = null;
+      if (userRole === "student") {
+        existingData = localStorage.getItem("studentData");
+      } else if (userRole === "parent") {
+        existingData = localStorage.getItem("parentData");
+      }
+      
+      let hasMeaningfulData = false;
+      if (existingData) {
+        try {
+          const parsed = JSON.parse(existingData);
+          hasMeaningfulData = !!(parsed.firstName || parsed.lastName || parsed.email);
+        } catch (e) {
+          hasMeaningfulData = false;
+        }
+      }
+      
+      if (shouldClearCache && !hasMeaningfulData) {
+        console.log('🔍 Debug - Clearing old/empty cache data');
+        if (userRole === "student") {
+          localStorage.removeItem("studentData");
+        } else if (userRole === "parent") {
+          localStorage.removeItem("parentData");
+        }
+      } else {
+        console.log('🔍 Debug - Keeping existing cache data (recent or meaningful)');
+      }
+      
       try {
         // Try to fetch fresh data from backend first
         if (userToken) {
@@ -32,31 +67,59 @@ const UserDetailsPage = () => {
           console.log('🔍 Debug - Backend profile data:', response);
           
           if (response && response.user) {
+            // Get existing localStorage data to preserve good values
+            let existingData = {};
+            if (userRole === "student") {
+              const stored = localStorage.getItem("studentData");
+              if (stored) {
+                try {
+                  existingData = JSON.parse(stored);
+                } catch (e) {
+                  console.error('Error parsing existing data:', e);
+                }
+              }
+            } else if (userRole === "parent") {
+              const stored = localStorage.getItem("parentData");
+              if (stored) {
+                try {
+                  existingData = JSON.parse(stored);
+                } catch (e) {
+                  console.error('Error parsing existing data:', e);
+                }
+              }
+            }
+            
             const backendData = {
-              firstName: response.user.firstname || 'User',
-              lastName: response.user.lastname || 'Name',
-              email: response.user.email || 'user@example.com',
-              userName: response.user.username || 'username',
-              phone: response.user.phonenumber || '',
-              role: userRole || 'student',
-              address: response.user.address || '',
+              // Use backend data if available, otherwise keep existing data
+              firstName: response.user.firstname || existingData.firstName || 'User',
+              lastName: response.user.lastname || existingData.lastName || 'Name',
+              email: response.user.email || existingData.email || 'user@example.com',
+              userName: response.user.username || existingData.userName || 'username',
+              phone: response.user.phonenumber || existingData.phone || '',
+              role: userRole || existingData.role || 'student',
+              address: response.student_profile?.address || existingData.address || '',
               ...(userRole === 'student' && {
-                grade: response.user.grade || '',
-                course: response.user.course || '',
-                parentEmail: response.user.parent_email || '',
-                parentName: response.user.parent_name || '',
-                parentPhone: response.user.parent_phone || ''
+                grade: response.student_profile?.grade || existingData.grade || '',
+                course: response.student_profile?.course || existingData.course || '',
+                // Use parent details from backend response or keep existing
+                parentEmail: response.parent_details?.parent_email || existingData.parentEmail || '',
+                parentName: response.parent_details?.parent_name || existingData.parentName || '',
+                parentPhone: response.parent_details?.parent_phone || existingData.parentPhone || ''
               })
             };
             
-            console.log('🔍 Debug - Using backend data:', backendData);
+            console.log('🔍 Debug - Using backend data with existing fallbacks:', backendData);
             setUserData(backendData);
             
-            // Update localStorage with fresh data
-            if (userRole === "student") {
-              localStorage.setItem("studentData", JSON.stringify(backendData));
-            } else {
-              localStorage.setItem("parentData", JSON.stringify(backendData));
+            // Only update localStorage if we have meaningful data
+            if (backendData.firstName || backendData.lastName || backendData.email) {
+              if (userRole === "student") {
+                localStorage.setItem("studentData", JSON.stringify(backendData));
+                localStorage.setItem("studentDataLastFetch", now.toString());
+              } else {
+                localStorage.setItem("parentData", JSON.stringify(backendData));
+                localStorage.setItem("parentDataLastFetch", now.toString());
+              }
             }
             return;
           }
@@ -80,29 +143,51 @@ const UserDetailsPage = () => {
         try {
           const parsedData = JSON.parse(storedData);
           console.log('🔍 Debug - Parsed user data:', parsedData);
+          
+          // Use the stored data as-is, don't overwrite with fallbacks
+          console.log('🔍 Debug - Using stored data as-is:', parsedData);
           setUserData(parsedData);
         } catch (error) {
           console.error('❌ Error parsing stored data:', error);
-          // Fallback: create basic user data from available info
+          // Don't create fallback data that overwrites good data
+          // Just set empty data and let user fill it
           const fallbackData = {
-            firstName: "User",
-            lastName: "Name",
-            email: "user@example.com",
+            firstName: "",
+            lastName: "",
+            email: "",
             role: userRole || "student",
-            userName: "username"
+            userName: "",
+            phone: "",
+            address: "",
+            ...(userRole === "student" && {
+              grade: "",
+              course: "",
+              parentEmail: "",
+              parentName: "",
+              parentPhone: ""
+            })
           };
-          console.log('🔍 Debug - Using fallback data:', fallbackData);
+          console.log('🔍 Debug - Using empty fallback data (not saving to localStorage):', fallbackData);
           setUserData(fallbackData);
         }
       } else {
-        // No stored data - create fallback data
-        console.log('🔍 Debug - No stored data found, creating fallback');
+        // No stored data - create empty data for user to fill
+        console.log('🔍 Debug - No stored data found, creating empty data (not saving to localStorage)');
         const fallbackData = {
-          firstName: "User",
-          lastName: "Name", 
-          email: "user@example.com",
+          firstName: "",
+          lastName: "", 
+          email: "",
           role: userRole || "student",
-          userName: "username"
+          userName: "",
+          phone: "",
+          address: "",
+          ...(userRole === "student" && {
+            grade: "",
+            course: "",
+            parentEmail: "",
+            parentName: "",
+            parentPhone: ""
+          })
         };
         setUserData(fallbackData);
       }
@@ -179,11 +264,32 @@ const UserDetailsPage = () => {
       // Update local state
       setUserData(updatedData);
 
-      // Update localStorage
+      // Update localStorage with complete data
+      const completeUpdatedData = {
+        ...updatedData,
+        // Ensure all fields are included
+        firstName: updatedData.firstName || userData.firstName || "User",
+        lastName: updatedData.lastName || userData.lastName || "Name",
+        email: updatedData.email || userData.email || "user@example.com",
+        userName: updatedData.userName || userData.userName || "username",
+        phone: updatedData.phone || userData.phone || "",
+        address: updatedData.address || userData.address || "",
+        role: updatedData.role || userData.role || "student",
+        ...(userData.role === "student" && {
+          grade: updatedData.grade || userData.grade || "",
+          course: updatedData.course || userData.course || "",
+          parentEmail: updatedData.parentEmail || userData.parentEmail || "",
+          parentName: updatedData.parentName || userData.parentName || "",
+          parentPhone: updatedData.parentPhone || userData.parentPhone || ""
+        })
+      };
+      
       if (userData.role === "student") {
-        localStorage.setItem("studentData", JSON.stringify(updatedData));
+        localStorage.setItem("studentData", JSON.stringify(completeUpdatedData));
+        localStorage.setItem("studentDataLastFetch", Date.now().toString());
       } else {
-        localStorage.setItem("parentData", JSON.stringify(updatedData));
+        localStorage.setItem("parentData", JSON.stringify(completeUpdatedData));
+        localStorage.setItem("parentDataLastFetch", Date.now().toString());
       }
 
       // Show success message

@@ -28,6 +28,7 @@ urlpatterns = [
     path('api/quizzes/', include('quizzes.urls')),
     path('api/progress/', include('progress.urls')),
     path('api/notifications/', include('notifications.urls')),
+    path('api/ai-assistant/', include('ai_assistant.urls')),
 ]
 
 # Serve media files in development

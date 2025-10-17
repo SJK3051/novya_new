@@ -50,15 +50,37 @@ function Navbar() {
   useEffect(() => {
     const checkLoginStatus = () => {
       const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-      const userData = localStorage.getItem('user');
+      const userRole = localStorage.getItem('userRole');
+      const userToken = localStorage.getItem('userToken');
       
-      console.log('Checking login status:', { loggedIn, userData });
+      // Get user data from the correct localStorage key based on role
+      let userData = null;
+      if (userRole === 'student') {
+        userData = localStorage.getItem('studentData');
+      } else if (userRole === 'parent') {
+        userData = localStorage.getItem('parentData');
+      }
       
-      setIsLoggedIn(loggedIn);
+      console.log('Checking login status:', { loggedIn, userRole, userData });
+      
+      setIsLoggedIn(loggedIn && !!userToken);
       
       // Safe JSON parsing with error handling
       try {
-        setUser(userData ? JSON.parse(userData) : null);
+        if (userData) {
+          const parsedData = JSON.parse(userData);
+          // Create user object with name field for navbar display
+          setUser({
+            name: `${parsedData.firstName || ''} ${parsedData.lastName || ''}`.trim() || 'User',
+            firstName: parsedData.firstName,
+            lastName: parsedData.lastName,
+            email: parsedData.email,
+            role: parsedData.role,
+            profileImage: parsedData.profileImage
+          });
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error parsing user data:', error);
         console.log('User data is not valid JSON:', userData);
@@ -98,6 +120,10 @@ function Navbar() {
     localStorage.removeItem('user');
     localStorage.removeItem('userToken');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('studentData');
+    localStorage.removeItem('parentData');
+    localStorage.removeItem('studentDataLastFetch');
+    localStorage.removeItem('parentDataLastFetch');
     
     setIsLoggedIn(false);
     setUser(null);

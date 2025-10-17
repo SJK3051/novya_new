@@ -35,4 +35,6 @@ urlpatterns = [
     path('student-profiles/', views.get_student_profiles, name='get_student_profiles'),
     path('student-profile/<int:student_id>/', views.student_profile_detail, name='student_profile_detail'),
     path('create-student-profile/', views.create_student_profile, name='create_student_profile'),
+    path('child-profile/', views.get_child_profile_for_parent, name='get_child_profile_for_parent'),
+    path('parent-profile/', views.get_parent_profile_with_child_address, name='get_parent_profile_with_child_address'),
 ]

@@ -448,26 +448,50 @@ const LoginPage = () => {
     }));
   };
  
+  // ✅ Clear all authentication data
+  const clearAuthData = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('firstName');
+    localStorage.removeItem('studentData');
+    localStorage.removeItem('parentData');
+    localStorage.removeItem('studentDataLastFetch');
+    localStorage.removeItem('parentDataLastFetch');
+    console.log('🔍 Debug - All authentication data cleared');
+  };
+
   // ✅ Handle login submit - REAL API INTEGRATION
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       const current = formData[activeTab];
       setIsLoading(true);
+      
+      // Clear any existing authentication data first
+      clearAuthData();
 
       try {
-        // Call Django backend login API
-        const response = await djangoAPI.post(API_CONFIG.DJANGO.AUTH.LOGIN, {
+        // Call Django backend login API (no auth needed for login)
+        const response = await djangoAPI.postNoAuth(API_CONFIG.DJANGO.AUTH.LOGIN, {
           username: current.username,
-          password: current.password,
-          role: activeTab // Send role to backend
+          password: current.password
         });
 
         // Store authentication data
+        console.log('🔍 Debug - Login response:', response);
+        const token = response.access || response.token;
+        console.log('🔍 Debug - Token received:', token ? token.substring(0, 50) + '...' : 'No token');
+        
         localStorage.setItem('userRole', activeTab);
-        localStorage.setItem('userToken', response.access || response.token);
+        localStorage.setItem('userToken', token);
         localStorage.setItem('refreshToken', response.refresh);
         localStorage.setItem('username', current.username);
+        
+        console.log('🔍 Debug - Authentication data stored in localStorage');
         
         // Store user data if provided
         if (response.user) {

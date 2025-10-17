@@ -186,20 +186,219 @@ def get_user_profile(request):
                 }
             
             return Response(response_data)
-            
         except StudentRegistration.DoesNotExist:
-            return Response({'error': 'No student data found'}, status=status.HTTP_404_NOT_FOUND)
-    else:
-        serializer = UserSerializer(user)
-        response_data = serializer.data
-        
-        # Add role-specific data
-        if user.role == 'Student' and hasattr(user, 'student'):
-            response_data['student_profile'] = StudentSerializer(user.student).data
-        elif user.role == 'Parent' and hasattr(user, 'parent'):
-            response_data['parent_profile'] = ParentSerializer(user.parent).data
+            return Response({'error': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': f'Failed to fetch profile: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    # Handle authenticated requests
+    try:
+        if user.role == 'Student':
+            try:
+                # Get student registration data
+                student_registration = StudentRegistration.objects.get(student_username=user.username)
+                response_data['student_registration'] = {
+                    'first_name': student_registration.first_name,
+                    'last_name': student_registration.last_name,
+                    'phone_number': student_registration.phone_number,
+                    'student_email': student_registration.student_email,
+                    'student_username': student_registration.student_username,
+                    'parent_email': student_registration.parent_email
+                }
+                
+                # Get student profile data if exists
+                try:
+                    student_profile = StudentProfile.objects.get(student_id=student_registration.student_id)
+                    response_data['student_profile'] = {
+                        'student_username': student_profile.student_username,
+                        'parent_email': student_profile.parent_email,
+                        'grade': student_profile.grade,
+                        'school': student_profile.school,
+                        'address': student_profile.address
+                    }
+                except StudentProfile.DoesNotExist:
+                    response_data['student_profile'] = {
+                        'student_username': '',
+                        'parent_email': '',
+                        'grade': '',
+                        'school': '',
+                        'address': ''
+                    }
+                
+                # Get parent details automatically if parent_email exists
+                if student_registration.parent_email and student_registration.parent_email != 'no-parent@example.com':
+                    try:
+                        parent_registration = ParentRegistration.objects.get(email=student_registration.parent_email)
+                        response_data['parent_details'] = {
+                            'parent_name': f"{parent_registration.first_name} {parent_registration.last_name}",
+                            'parent_email': parent_registration.email,
+                            'parent_phone': parent_registration.phone_number
+                        }
+                    except ParentRegistration.DoesNotExist:
+                        response_data['parent_details'] = {
+                            'parent_name': 'Not provided',
+                            'parent_email': 'Not provided',
+                            'parent_phone': 'Not provided'
+                        }
+                else:
+                    response_data['parent_details'] = {
+                        'parent_name': 'Not provided',
+                        'parent_email': 'Not provided',
+                        'parent_phone': 'Not provided'
+                    }
+                    
+            except StudentRegistration.DoesNotExist:
+                response_data['student_registration'] = None
+                response_data['student_profile'] = None
+                response_data['parent_details'] = None
+                
+        elif user.role == 'Parent':
+            try:
+                # Get parent registration data
+                parent_registration = ParentRegistration.objects.get(parent_username=user.username)
+                response_data['parent_registration'] = {
+                    'first_name': parent_registration.first_name,
+                    'last_name': parent_registration.last_name,
+                    'phone_number': parent_registration.phone_number,
+                    'email': parent_registration.email,
+                    'parent_username': parent_registration.parent_username
+                }
+            except ParentRegistration.DoesNotExist:
+                response_data['parent_registration'] = None
         
         return Response(response_data)
+    except Exception as e:
+        return Response({'error': f'Failed to fetch profile: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_child_profile_for_parent(request):
+    """
+    Get child profile data for a parent user.
+    Fetches student data from StudentRegistration and StudentProfile tables.
+    """
+    user = request.user
+    
+    if user.role != 'Parent':
+        return Response({'error': 'Access denied. Only parent users can access this endpoint.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        # Get parent registration data
+        parent_registration = ParentRegistration.objects.get(parent_username=user.username)
+        
+        # Find student(s) linked to this parent via parent_email
+        student_registrations = StudentRegistration.objects.filter(parent_email=parent_registration.email)
+        
+        if not student_registrations.exists():
+            return Response({'error': 'No child found linked to this parent account.'}, 
+                           status=status.HTTP_404_NOT_FOUND)
+        
+        # For now, get the first student (can be extended for multiple children)
+        student_reg = student_registrations.first()
+        
+        # Get student profile data
+        try:
+            student_profile = StudentProfile.objects.get(student_id=student_reg.student_id)
+        except StudentProfile.DoesNotExist:
+            student_profile = None
+        
+        # Get user data for the student
+        try:
+            student_user = User.objects.get(username=student_reg.student_username)
+        except User.DoesNotExist:
+            student_user = None
+        
+        # Build response data
+        response_data = {
+            'student_registration': {
+                'student_id': student_reg.student_id,
+                'first_name': student_reg.first_name,
+                'last_name': student_reg.last_name,
+                'student_username': student_reg.student_username,
+                'student_email': student_reg.student_email,
+                'phone_number': student_reg.phone_number,
+                'parent_email': student_reg.parent_email,
+                'created_at': student_reg.created_at
+            },
+            'student_profile': {
+                'profile_id': student_profile.profile_id if student_profile else None,
+                'grade': student_profile.grade if student_profile else None,
+                'school': student_profile.school if student_profile else None,
+                'address': student_profile.address if student_profile else None,
+                'course_id': student_profile.course_id if student_profile else None
+            },
+            'student_user': {
+                'userid': student_user.userid if student_user else None,
+                'username': student_user.username if student_user else None,
+                'email': student_user.email if student_user else None,
+                'phonenumber': student_user.phonenumber if student_user else None,
+                'firstname': student_user.firstname if student_user else None,
+                'lastname': student_user.lastname if student_user else None
+            }
+        }
+        
+        return Response(response_data)
+        
+    except ParentRegistration.DoesNotExist:
+        return Response({'error': 'Parent registration not found.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': f'Failed to fetch child profile: {str(e)}'}, 
+                       status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_parent_profile_with_child_address(request):
+    """
+    Get parent profile data with child's address.
+    Fetches parent contact info from ParentRegistration and child's address from StudentProfile.
+    """
+    user = request.user
+    
+    if user.role != 'Parent':
+        return Response({'error': 'Access denied. Only parent users can access this endpoint.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        # Get parent registration data
+        parent_registration = ParentRegistration.objects.get(parent_username=user.username)
+        
+        # Find student(s) linked to this parent via parent_email
+        student_registrations = StudentRegistration.objects.filter(parent_email=parent_registration.email)
+        
+        # Get child's address from student profile (use first child's address)
+        child_address = 'Not specified'
+        if student_registrations.exists():
+            student_reg = student_registrations.first()
+            try:
+                student_profile = StudentProfile.objects.get(student_id=student_reg.student_id)
+                child_address = student_profile.address if student_profile.address else 'Not specified'
+            except StudentProfile.DoesNotExist:
+                child_address = 'Not specified'
+        
+        # Build response data
+        response_data = {
+            'parent_registration': {
+                'parent_id': parent_registration.parent_id,
+                'first_name': parent_registration.first_name,
+                'last_name': parent_registration.last_name,
+                'email': parent_registration.email,
+                'phone_number': parent_registration.phone_number,
+                'parent_username': parent_registration.parent_username,
+                'created_at': parent_registration.created_at
+            },
+            'child_address': child_address
+        }
+        
+        return Response(response_data)
+        
+    except ParentRegistration.DoesNotExist:
+        return Response({'error': 'Parent registration not found.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': f'Failed to fetch parent profile: {str(e)}'}, 
+                       status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['PUT', 'PATCH'])
@@ -737,6 +936,29 @@ def get_user_profile_data(request):
                 'address': ''
             }
         
+        # Get parent details automatically if parent_email exists
+        parent_details = {}
+        if student_registration.parent_email and student_registration.parent_email != 'no-parent@example.com':
+            try:
+                parent_registration = ParentRegistration.objects.get(email=student_registration.parent_email)
+                parent_details = {
+                    'parent_name': f"{parent_registration.first_name} {parent_registration.last_name}",
+                    'parent_email': parent_registration.email,
+                    'parent_phone': parent_registration.phone_number
+                }
+            except ParentRegistration.DoesNotExist:
+                parent_details = {
+                    'parent_name': 'Not provided',
+                    'parent_email': 'Not provided',
+                    'parent_phone': 'Not provided'
+                }
+        else:
+            parent_details = {
+                'parent_name': 'Not provided',
+                'parent_email': 'Not provided',
+                'parent_phone': 'Not provided'
+            }
+        
         # Prepare user data
         if user.is_authenticated:
             user_data = {
@@ -766,7 +988,8 @@ def get_user_profile_data(request):
                 'student_username': student_registration.student_username,
                 'parent_email': student_registration.parent_email
             },
-            'student_profile': profile_data
+            'student_profile': profile_data,
+            'parent_details': parent_details
         }, status=status.HTTP_200_OK)
         
     except StudentRegistration.DoesNotExist:

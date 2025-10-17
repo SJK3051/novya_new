@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ChildProfile from './ChildProfile';
 import Attendance from './Attendance';
 import Progress from './Progress';
-import Homework from './HomeWork';
+import QuizReports from './QuizReports';
 import MockTestReports from './MockTestReports';
 import StudyPlanner from './StudyPlanner';
 import ContactUs from './ContactUs';
@@ -29,6 +29,7 @@ import {
 } from 'react-icons/hi2';
 import novyaLogo from '../home/assets/NOVYA LOGO.png';
 import { FaPhoneAlt } from 'react-icons/fa';
+import { API_CONFIG, djangoAPI } from '../../config/api';
 import './styles.css';
 
 // const ParentDashboard = () => {
@@ -395,7 +396,7 @@ import './styles.css';
 //                   </div>
 //                   <div className="stat-content">
 //                     <div className="stat-value">8/10</div>
-//                     <div className="stat-label">{t('stats.assignments')}</div>
+//                     <div className="stat-label">Quizzes</div>
 //                     <div className="stat-change neutral">2 {t('stats.pending')}</div>
 //                   </div>
 //                 </div>
@@ -2171,23 +2172,79 @@ const ParentDashboard = () => {
     const username = localStorage.getItem('parentUsername') || localStorage.getItem('username') || 'Parent';
     setParentName(username);
    
-    // Initialize edited parent data
-    let parentData = {};
+    // Fetch parent data from backend API
+    const fetchParentData = async () => {
+      try {
+        console.log('🔍 Debug - Fetching parent profile from backend...');
+        const response = await djangoAPI.get(API_CONFIG.DJANGO.AUTH.PARENT_PROFILE);
+        console.log('🔍 Debug - Parent profile response:', response);
+        
+        if (response && response.parent_registration) {
+          const parentReg = response.parent_registration;
+          const childAddress = response.child_address;
+          
+          const parentData = {
+            firstName: parentReg.first_name || "",
+            lastName: parentReg.last_name || "",
+            email: parentReg.email || "",
+            phone: parentReg.phone_number || "",
+            userName: parentReg.parent_username || "",
+            address: childAddress || "" // Use child's address
+          };
+          
+          console.log('🔍 Debug - Parent data from backend:', parentData);
+          setEditedParentData(parentData);
+          
+          // Update parent name
+          if (parentData.firstName) {
+            setParentName(`${parentData.firstName} ${parentData.lastName}`.trim());
+          }
+        } else {
+          console.log('🔍 Debug - No parent data found in backend response');
+          // Fallback to localStorage if backend fails
+          let fallbackData = {};
     try {
       const storedData = localStorage.getItem("parentData");
-      parentData = storedData ? JSON.parse(storedData) : {};
+            fallbackData = storedData ? JSON.parse(storedData) : {};
     } catch (error) {
-      console.error('Error parsing parent data:', error);
-      parentData = {};
+            console.error('Error parsing fallback parent data:', error);
+            fallbackData = {};
     }
     setEditedParentData({
-      firstName: parentData.firstName || "",
-      lastName: parentData.lastName || "",
-      email: parentData.email || "",
-      phone: parentData.phone || "",
-      userName: parentData.userName || "",
-      address: parentData.address || ""
-    });
+            firstName: fallbackData.firstName || "",
+            lastName: fallbackData.lastName || "",
+            email: fallbackData.email || "",
+            phone: fallbackData.phone || "",
+            userName: fallbackData.userName || "",
+            address: fallbackData.address || ""
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error fetching parent data from backend:', error);
+        console.error('❌ Error details:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        
+        // Fallback to localStorage if backend fails
+        let fallbackData = {};
+        try {
+          const storedData = localStorage.getItem("parentData");
+          fallbackData = storedData ? JSON.parse(storedData) : {};
+        } catch (fallbackError) {
+          console.error('Error parsing fallback parent data:', fallbackError);
+          fallbackData = {};
+        }
+        setEditedParentData({
+          firstName: fallbackData.firstName || "",
+          lastName: fallbackData.lastName || "",
+          email: fallbackData.email || "",
+          phone: fallbackData.phone || "",
+          userName: fallbackData.userName || "",
+          address: fallbackData.address || ""
+        });
+      }
+    };
+    
+    fetchParentData();
    
     setNotifications([
       { id: 1, title: t('notifications.newAssignment'), message: t('notifications.assignmentMessage'), time: t('notifications.hoursAgo', { count: 2 }), read: false },
@@ -2214,7 +2271,7 @@ const ParentDashboard = () => {
       profile: t('sections.profile'),
       attendance: t('sections.attendance'),
       grades: t('sections.progress'),
-      homework: t('sections.assignments'),
+      homework: 'Quizzes',
       mockreports: t('sections.mockTests'),
       studyplanner: t('sections.studyPlan'),
       faq: t('sections.contact')
@@ -2341,7 +2398,7 @@ const ParentDashboard = () => {
     },
     {
       key: 'homework',
-      label: t('sections.assignments'),
+      label: 'Quizzes',
       icon: HiOutlineAcademicCap,
       gradient: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
     },
@@ -2362,7 +2419,7 @@ const ParentDashboard = () => {
       label: t('sections.contact'),
       icon: FaPhoneAlt,
       gradient: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    }
+    },
   ];
 
   const handleLogout = () => {
@@ -2423,7 +2480,7 @@ const ParentDashboard = () => {
       case 'profile': return <ChildProfile />;
       case 'attendance': return <Attendance />;
       case 'grades': return <Progress />;
-      case 'homework': return <Homework />;
+      case 'homework': return <QuizReports />;
       case 'mockreports': return <MockTestReports />;
       case 'studyplanner': return <StudyPlanner />;
       case 'faq': return <ContactUs />;
@@ -2503,7 +2560,7 @@ const ParentDashboard = () => {
                   </div>
                   <div className="stat-content">
                     <div className="stat-value">8/10</div>
-                    <div className="stat-label">{t('stats.assignments')}</div>
+                    <div className="stat-label">Quizzes</div>
                     <div className="stat-change neutral">2 {t('stats.pending')}</div>
                   </div>
                 </div>

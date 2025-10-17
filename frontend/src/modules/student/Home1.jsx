@@ -2055,8 +2055,30 @@ const Home1 = () => {
     document.title = t('dashboard.title') + " | NOVYA - Your Smart Learning Platform";
   }, [t]);
 
+  // Fetch user data from localStorage
+  useEffect(() => {
+    const userRole = localStorage.getItem('userRole');
+    let storedData = null;
+    
+    if (userRole === 'student') {
+      storedData = localStorage.getItem('studentData');
+    } else if (userRole === 'parent') {
+      storedData = localStorage.getItem('parentData');
+    }
+    
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        setUserData(parsedData);
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
+
   const navigate = useNavigate();
   const [currentCourse, setCurrentCourse] = useState(t('dashboard.currentCourse'));
+  const [userData, setUserData] = useState(null);
 
   const coursesByClass = {
     '7': [
@@ -2161,12 +2183,22 @@ const Home1 = () => {
     const fetchQuizData = async () => {
       try {
         console.log('🔍 Debug - Home page fetching performance data...');
-        const performanceData = await getStudentPerformance();
-        console.log('🔍 Debug - Performance data received:', performanceData);
+        const { getRecentQuizAttempts } = await import('../../utils/quizTracking');
+        const attemptsData = await getRecentQuizAttempts();
+        console.log('🔍 Debug - Attempts data received:', attemptsData);
         
-        if (performanceData) {
-          const quizAvg = performanceData.quiz_average_score || 0;
-          const mockTestAvg = performanceData.mock_test_average_score || 0;
+        if (attemptsData && attemptsData.attempts) {
+          const attempts = attemptsData.attempts;
+          
+          // Calculate quiz average
+          const quizAttempts = attempts.filter(attempt => attempt.type === 'quiz');
+          const quizScores = quizAttempts.map(attempt => attempt.score || 0);
+          const quizAvg = quizScores.length > 0 ? quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length : 0;
+          
+          // Calculate mock test average
+          const mockTestAttempts = attempts.filter(attempt => attempt.type === 'mock_test');
+          const mockTestScores = mockTestAttempts.map(attempt => attempt.score || 0);
+          const mockTestAvg = mockTestScores.length > 0 ? mockTestScores.reduce((sum, score) => sum + score, 0) / mockTestScores.length : 0;
           
           console.log('🔍 Debug - Quiz average:', quizAvg);
           console.log('🔍 Debug - Mock test average:', mockTestAvg);
@@ -2211,7 +2243,7 @@ const Home1 = () => {
           console.log('🔍 Debug - No performance data received');
         }
       } catch (error) {
-        console.error('❌ Error fetching quiz statistics:', error);
+        console.error('❌ Error fetching quiz attempts data:', error);
       }
     };
 
@@ -2509,7 +2541,11 @@ const Home1 = () => {
                     overflow: "visible"
                   }}
                 >
-                  <h3 style={{ margin: 0 }}>{currentCourse}</h3>
+                  <h3 style={{ margin: 0 }}>
+                    {userData && userData.grade && userData.course 
+                      ? `${userData.course} Grade ${userData.grade}` 
+                      : currentCourse}
+                  </h3>
                   <motion.span
                     className="badge"
                     animate={pulseAnimation}
@@ -2525,7 +2561,7 @@ const Home1 = () => {
                   </motion.span>
                 </div>
                 <div className="course-meta">
-                  <span><i className="fas fa-chalkboard-teacher"></i> {t('dashboard.instructor')}</span>
+                  <span><i className="fas fa-user"></i> Student: {userData && userData.firstName && userData.lastName ? `${userData.firstName} ${userData.lastName}` : 'Student Name'}</span>
                   <span><i className="fas fa-calendar-alt"></i> {t('dashboard.startDate')}</span>
                 </div>
                 <div className="progress-container mt-3">

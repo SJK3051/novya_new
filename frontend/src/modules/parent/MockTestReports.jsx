@@ -588,12 +588,13 @@
 
 
  
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   FaChartLine, FaMedal, FaExclamationTriangle, FaArrowUp
 } from 'react-icons/fa';
 import { Table } from 'react-bootstrap';
+import { API_CONFIG, djangoAPI } from '../../config/api';
  
 // Data
 const mockTestData = [
@@ -683,16 +684,126 @@ const getStatusConfig = (status, t) => {
 };
  
 const MockTestReports = () => {
+  console.log('🔍 Debug - MockTestReports component rendered');
   const { t } = useTranslation();
- 
+  const [mockTestData, setMockTestData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch mock test data from backend
+  useEffect(() => {
+    console.log('🔍 Debug - MockTestReports useEffect called');
+    console.log('🔍 Debug - API_CONFIG.DJANGO.QUIZZES.CHILD_ATTEMPTS:', API_CONFIG.DJANGO.QUIZZES.CHILD_ATTEMPTS);
+    
+    const fetchMockTestData = async () => {
+      try {
+        console.log('🔍 Debug - Fetching mock test data from backend...');
+        
+        // Check if we already have data in localStorage to avoid duplicate calls
+        const cachedData = localStorage.getItem('mockTestReportsData');
+        const lastFetch = localStorage.getItem('mockTestReportsDataLastFetch');
+        const now = Date.now();
+        
+        // Use cached data if it's less than 5 minutes old
+        if (cachedData && lastFetch && (now - parseInt(lastFetch)) < 300000) {
+          console.log('🔍 Debug - Using cached mock test reports data');
+          const parsedData = JSON.parse(cachedData);
+          setMockTestData(parsedData || []);
+          setLoading(false);
+          return;
+        }
+        
+        console.log('🔍 Debug - URL:', API_CONFIG.DJANGO.QUIZZES.CHILD_ATTEMPTS);
+        const response = await djangoAPI.get(API_CONFIG.DJANGO.QUIZZES.CHILD_ATTEMPTS);
+        console.log('🔍 Debug - Mock test response:', response);
+        
+        if (response && response.attempts) {
+          // Filter for mock test attempts only
+          const mockTests = response.attempts.filter(attempt => attempt.type === 'mock_test');
+          
+          console.log('🔍 Debug - Raw mock test attempts from backend:', mockTests);
+          
+          // Transform the data to match our component structure
+          const transformedData = mockTests.map(attempt => ({
+            subject: attempt.subject || 'Unknown Subject',
+            class: attempt.class_name || 'Unknown Class',
+            subtopic: attempt.subtopic || 'General Test',
+            date: new Date(attempt.attempted_at).toISOString().split('T')[0],
+            score: attempt.score || 0,
+            total: 100, // Assuming total is 100 for mock tests
+            status: attempt.score >= 80 ? 'Excellent' : attempt.score >= 60 ? 'Good' : 'Needs Attention',
+            trend: 'up', // Default trend
+            improvement: '+0%', // Default improvement
+            // Add additional fields from the backend
+            attempt_id: attempt.attempt_id,
+            quiz_type: attempt.quiz_type,
+            completion_percentage: attempt.completion_percentage
+          }));
+          
+          console.log('🔍 Debug - Transformed mock test data:', transformedData);
+          
+          // Cache the data
+          localStorage.setItem('mockTestReportsData', JSON.stringify(transformedData));
+          localStorage.setItem('mockTestReportsDataLastFetch', now.toString());
+          
+          setMockTestData(transformedData);
+        } else {
+          console.log('🔍 Debug - No mock test data found, using fallback');
+          setMockTestData([]);
+        }
+      } catch (error) {
+        console.error('❌ Error fetching mock test data:', error);
+        console.error('❌ Error details:', error.message);
+        console.error('❌ Error stack:', error.stack);
+        // No fallback data - show empty state if backend fails
+        setMockTestData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMockTestData();
+  }, []);
+
   // Header stats
   const testCount = mockTestData.length;
   const upTests = mockTestData.filter(t => t.trend === 'up').length;
-  const avgScore = Math.round(
+  const avgScore = testCount > 0 ? Math.round(
     mockTestData.reduce((a, b) => a + b.score, 0) / testCount
-  );
+  ) : 0;
   const excTests = mockTestData.filter(t => t.status === 'Excellent').length;
  
+  if (loading) {
+    return (
+      <div style={{ 
+        minHeight: "100vh", 
+        backgroundColor: '#e9eaf0ff', 
+        padding: "2rem 1rem", 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
+        <div style={{ textAlign: 'center', color: '#2d3748' }}>
+          <div style={{ 
+            width: '40px', 
+            height: '40px', 
+            border: '4px solid #f3f3f3', 
+            borderTop: '4px solid #8B5CF6', 
+            borderRadius: '50%', 
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto 1rem'
+          }}></div>
+          <p>Loading mock test data...</p>
+        </div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Bootstrap CSS */}
@@ -995,9 +1106,9 @@ const MockTestReports = () => {
                         <FaArrowUp className="icon-sm" style={{ color: '#17a2b8', width: 20, height: 20 }} />
                       </div>
                       <h5 className="fw-bold mb-0" style={{ color: '#17a2b8' }}>
-                        {upTests}/{testCount}
+                        {testCount}
                       </h5>
-                      <p className="text-muted small mb-0">{t('testsImproved')}</p>
+                      <p className="text-muted small mb-0">Total Tests</p>
                     </div>
                   </div>
                 </div>
@@ -1024,11 +1135,12 @@ const MockTestReports = () => {
                       <thead style={{ backgroundColor: '#2d5d7b', color: '#fff' }}>
                         <tr>
                           <th className="text-center py-1">{t('date')}</th>
+                          <th className="text-center py-1">Class</th>
                           <th className="text-center py-1">{t('subject')}</th>
                           <th className="text-center py-1">{t('score')}</th>
                           <th className="text-center py-1">{t('progress')}</th>
                           <th className="text-center py-1">{t('status')}</th>
-                          <th className="text-center py-1">{t('trend')}</th>
+                          <th className="text-center py-1">Chapter</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1044,6 +1156,7 @@ const MockTestReports = () => {
                               borderBottom: '1px solid rgba(0,0,0,0.05)'
                             }}>
                               <td className="text-center fw-medium">{test.date}</td>
+                              <td className="text-center fw-bold">{test.class}</td>
                               <td className="text-center fw-bold">{t(`subjects.${test.subject.toLowerCase().replace(' ', '-')}`, { defaultValue: test.subject })}</td>
                               <td className="text-center fw-semibold">
                                 {test.score}<span className="text-muted">/{test.total}</span>
@@ -1073,8 +1186,8 @@ const MockTestReports = () => {
                                   {status.translatedStatus}
                                 </div>
                               </td>
-                              <td className="text-center fw-bold" style={{ color: isUp ? '#28a745' : '#dc3545', fontSize: '0.8rem' }}>
-                                {isUp ? '↑' : '↓'} {test.improvement}
+                              <td className="text-center fw-bold" style={{ fontSize: '0.8rem' }}>
+                                {test.subtopic}
                               </td>
                             </tr>
                           );
@@ -1094,6 +1207,7 @@ const MockTestReports = () => {
                           backgroundColor: index % 2 === 0 ? '#ffffff' : '#f4f8fb',
                         }}>
                           <div><span className="test-label">{t('date')}:</span> <span className="test-value">{test.date}</span></div>
+                          <div><span className="test-label">Class:</span> <span className="test-value">{test.class}</span></div>
                           <div><span className="test-label">{t('subject')}:</span> <span className="test-value">{t(`subjects.${test.subject.toLowerCase().replace(' ', '-')}`, { defaultValue: test.subject })}</span></div>
                           <div><span className="test-label">{t('score')}:</span> <span className="test-value">{test.score}/{test.total}</span></div>
                           <div className="progress-container">
@@ -1121,9 +1235,9 @@ const MockTestReports = () => {
                               {status.translatedStatus}
                             </div>
                           </div>
-                          <div><span className="test-label">{t('trend')}:</span> <span className="test-value" style={{ color: isUp ? '#28a745' : '#dc3545' }}>
-                            {isUp ? '↑' : '↓'} {test.improvement}
-                          </span></div>
+                        <div><span className="test-label">Chapter:</span> <span className="test-value">
+                          {test.subtopic}
+                        </span></div>
                         </div>
                       );
                     })}

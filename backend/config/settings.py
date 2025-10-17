@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'quizzes',
     'progress',
     'notifications',
+    'ai_assistant',
 ]
 
 MIDDLEWARE = [

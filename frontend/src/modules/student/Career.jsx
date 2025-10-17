@@ -108,7 +108,7 @@ const Career = () => {
         
         setQuizPerformanceData(performanceRes);
         setQuizStatisticsData(statisticsRes);
-        setRecentQuizAttempts(recentAttemptsRes || []);
+        setRecentQuizAttempts(recentAttemptsRes?.attempts || []);
       } catch (error) {
         console.error('❌ Error fetching quiz data:', error);
         // Fallback to static data if API fails
@@ -783,7 +783,7 @@ const Career = () => {
                           <div key={item.attempt_id || item.id || index} className="history-item">
                             <div className="history-info">
                               <span className="history-title">
-                                {item.class_name || item.class || 'N/A'} - {item.subject || 'N/A'} - {item.topic || item.subtopic || 'N/A'}
+                                {item.class_name || item.class || 'Unknown Class'} - {item.subject || 'Unknown Subject'} - {item.topic || item.subtopic || 'Unknown Topic'}
                               </span>
                               <span className="history-score">{item.score || 0}% ({item.total_questions || item.questions || 0} questions)</span>
                               <span className="history-date">{item.attempted_at ? new Date(item.attempted_at).toLocaleDateString() : (item.date || 'N/A')}</span>

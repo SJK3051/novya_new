@@ -28,6 +28,8 @@ export const API_CONFIG = {
       REFRESH_TOKEN: `${DJANGO_BASE_URL}/auth/token/refresh/`,
       USER_PROFILE: `${DJANGO_BASE_URL}/auth/profile/`,
       PROFILE_UPDATE: `${DJANGO_BASE_URL}/auth/profile/update/`,
+      CHILD_PROFILE: `${DJANGO_BASE_URL}/auth/child-profile/`,
+      PARENT_PROFILE: `${DJANGO_BASE_URL}/auth/parent-profile/`,
     },
     
     // Courses
@@ -50,6 +52,7 @@ export const API_CONFIG = {
       // NEW: Enhanced Quiz Tracking System
       SUBMIT_ATTEMPT: `${DJANGO_BASE_URL}/quizzes/submit-attempt/`,
       RECENT_ATTEMPTS: `${DJANGO_BASE_URL}/quizzes/recent-attempts/`,
+      CHILD_ATTEMPTS: `${DJANGO_BASE_URL}/quizzes/child-attempts/`,
       PERFORMANCE: `${DJANGO_BASE_URL}/quizzes/performance/`,
       STATISTICS: `${DJANGO_BASE_URL}/quizzes/statistics/`,
       
@@ -76,6 +79,30 @@ export const API_CONFIG = {
       LIST: `${DJANGO_BASE_URL}/notifications/`,
       MARK_READ: (id) => `${DJANGO_BASE_URL}/notifications/${id}/mark-read/`,
       MARK_ALL_READ: `${DJANGO_BASE_URL}/notifications/mark-all-read/`,
+    },
+    
+    // AI Assistant - Database Operations
+    AI_ASSISTANT: {
+      // Save endpoints
+      SAVE_STUDY_PLAN: `${DJANGO_BASE_URL}/ai-assistant/save-study-plan/`,
+      SAVE_AI_NOTE: `${DJANGO_BASE_URL}/ai-assistant/save-ai-note/`,
+      SAVE_MANUAL_NOTE: `${DJANGO_BASE_URL}/ai-assistant/save-manual-note/`,
+      SAVE_CHAT_MESSAGE: `${DJANGO_BASE_URL}/ai-assistant/save-chat-message/`,
+      
+      // Get endpoints
+      GET_STUDY_PLANS: `${DJANGO_BASE_URL}/ai-assistant/study-plans/`,
+      GET_AI_NOTES: `${DJANGO_BASE_URL}/ai-assistant/ai-notes/`,
+      GET_MANUAL_NOTES: `${DJANGO_BASE_URL}/ai-assistant/manual-notes/`,
+      GET_CHAT_HISTORY: `${DJANGO_BASE_URL}/ai-assistant/chat-history/`,
+      GET_ALL_NOTES: `${DJANGO_BASE_URL}/ai-assistant/all-notes/`,
+      
+      // Update/Delete endpoints
+      UPDATE_MANUAL_NOTE: (noteId) => `${DJANGO_BASE_URL}/ai-assistant/manual-notes/${noteId}/`,
+      DELETE_MANUAL_NOTE: (noteId) => `${DJANGO_BASE_URL}/ai-assistant/manual-notes/${noteId}/delete/`,
+      
+      // Favorites endpoints
+      TOGGLE_FAVORITE: `${DJANGO_BASE_URL}/ai-assistant/toggle-favorite/`,
+      GET_FAVORITES: `${DJANGO_BASE_URL}/ai-assistant/favorites/`,
     },
   },
   
@@ -124,12 +151,45 @@ export const getAuthHeaders = () => {
   console.log('🔍 Debug - getAuthHeaders - Token exists:', !!token);
   console.log('🔍 Debug - getAuthHeaders - Token preview:', token ? token.substring(0, 50) + '...' : 'No token');
   
+  // Check if token is valid (basic check - not expired format)
+  if (token && token.includes('.')) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        console.log('🔍 Debug - Token is expired, clearing authentication data');
+        clearAuthData();
+        return { 'Content-Type': 'application/json' };
+      }
+    } catch (e) {
+      console.log('🔍 Debug - Invalid token format, clearing authentication data');
+      clearAuthData();
+      return { 'Content-Type': 'application/json' };
+    }
+  }
+  
   return token ? {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json',
   } : {
     'Content-Type': 'application/json',
   };
+};
+
+// Clear all authentication data
+export const clearAuthData = () => {
+  localStorage.removeItem('userToken');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userRole');
+  localStorage.removeItem('username');
+  localStorage.removeItem('userId');
+  localStorage.removeItem('userEmail');
+  localStorage.removeItem('firstName');
+  localStorage.removeItem('studentData');
+  localStorage.removeItem('parentData');
+  localStorage.removeItem('studentDataLastFetch');
+  localStorage.removeItem('parentDataLastFetch');
+  console.log('🔍 Debug - All authentication data cleared from api.js');
 };
 
 /**
@@ -160,6 +220,13 @@ export const djangoAPI = {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ API Error Response:', errorText);
+      
+      // If 401 Unauthorized, clear authentication data
+      if (response.status === 401) {
+        console.log('🔍 Debug - 401 Unauthorized, clearing authentication data');
+        clearAuthData();
+      }
+      
       throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
     }
     
@@ -169,24 +236,61 @@ export const djangoAPI = {
   },
   
   post: async (url, data) => {
+    console.log('🔍 Debug - djangoAPI.post called with URL:', url);
+    console.log('🔍 Debug - Headers:', getAuthHeaders());
+    console.log('🔍 Debug - Data:', data);
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
+    
+    console.log('🔍 Debug - Response status:', response.status);
+    console.log('🔍 Debug - Response ok:', response.ok);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      
+      // If 401 Unauthorized, clear authentication data
+      if (response.status === 401) {
+        console.log('🔍 Debug - 401 Unauthorized, clearing authentication data');
+        clearAuthData();
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('🔍 Debug - Response data:', responseData);
+    return responseData;
   },
   
   // Special method for registration (no auth needed)
   postNoAuth: async (url, data) => {
+    console.log('🔍 Debug - djangoAPI.postNoAuth called with URL:', url);
+    console.log('🔍 Debug - Headers:', getNoAuthHeaders());
+    console.log('🔍 Debug - Data:', data);
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: getNoAuthHeaders(),
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-    return await response.json();
+    
+    console.log('🔍 Debug - Response status:', response.status);
+    console.log('🔍 Debug - Response ok:', response.ok);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API Error Response:', errorText);
+      throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+    }
+    
+    const responseData = await response.json();
+    console.log('🔍 Debug - Response data:', responseData);
+    return responseData;
   },
   
   put: async (url, data) => {

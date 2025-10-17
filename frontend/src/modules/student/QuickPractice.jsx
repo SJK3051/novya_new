@@ -4,6 +4,7 @@ import QuizSubject from "./QuizSubject";
 import QuizQuestion from "./QuizQuestion";
 import { useQuiz } from "./QuizContext";
 import { submitQuizAttempt, calculateQuizStats } from "../../utils/quizTracking";
+import { API_CONFIG, fastAPI } from "../../config/api";
 import "./Quiz.css";
  
 function Quiz() {
@@ -29,8 +30,7 @@ function Quiz() {
  
   // Fetch classes
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/classes")
-      .then((res) => res.json())
+    fastAPI.get(API_CONFIG.FASTAPI.QUICK_PRACTICE.GET_CLASSES)
       .then((data) => setClasses(data.classes))
       .catch(() => setError("Failed to load classes"));
   }, []);
@@ -38,8 +38,7 @@ function Quiz() {
   const fetchSubjects = (className) => {
     if (!className) return;
     setLoading(true);
-    fetch(`http://127.0.0.1:8000/chapters?class_name=${className}`)
-      .then((res) => res.json())
+    fastAPI.get(API_CONFIG.FASTAPI.QUICK_PRACTICE.GET_CHAPTERS(className))
       .then((data) => {
         setSubjects(data.chapters || []);
         setLoading(false);
@@ -53,8 +52,7 @@ function Quiz() {
   const fetchSubtopics = (className, subject) => {
     if (!className || !subject) return;
     setLoading(true);
-    fetch(`http://127.0.0.1:8000/subtopics?class_name=${className}&subject=${subject}`)
-      .then((res) => res.json())
+    fastAPI.get(API_CONFIG.FASTAPI.QUICK_PRACTICE.GET_SUBTOPICS(className, subject))
       .then((data) => {
         if (Array.isArray(data.subtopics)) {
           setSubtopics({ "Chapter 1": data.subtopics });
@@ -77,19 +75,19 @@ function Quiz() {
     if (!subtopic) return;
     setLoading(true);
     
-    // Construct URL with language parameter
-    const url = `http://127.0.0.1:8000/quiz?subtopic=${encodeURIComponent(
-      subtopic
-    )}&currentLevel=${level}&retry=${retry}&language=${encodeURIComponent(language)}`;
+    // Construct URL with language parameter using API config
+    const params = {
+      subtopic: subtopic,
+      currentLevel: level,
+      retry: retry,
+      language: language
+    };
+    const url = API_CONFIG.FASTAPI.QUICK_PRACTICE.GENERATE_QUIZ(params);
     
     console.log("Fetching quiz with URL:", url); // Debug log
     console.log("Language being sent:", language); // Debug log
     
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
+    fastAPI.get(url)
       .then((data) => {
         console.log("Quiz data received:", data); // Debug log
         if (data.error) setError(data.error);

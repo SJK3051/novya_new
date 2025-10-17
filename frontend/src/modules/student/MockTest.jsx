@@ -5,6 +5,7 @@ import Navbar from "./Navbarrr";
 import { useQuiz } from "./QuizContext";
 import { useNavigate } from "react-router-dom";
 import { submitQuizAttempt, calculateQuizStats } from "../../utils/quizTracking";
+import { API_CONFIG, fastAPI } from "../../config/api";
 
 function MockTest() {
   const { updateMockTestResults } = useQuiz();
@@ -64,11 +65,7 @@ function MockTest() {
 
   // Fetch classes
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/classes")
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch classes");
-        return res.json();
-      })
+    fastAPI.get(API_CONFIG.FASTAPI.MOCK_TEST.GET_CLASSES)
       .then(data => setClasses(data.classes || []))
       .catch(() => setError("Failed to load classes"));
   }, []);
@@ -179,11 +176,7 @@ function MockTest() {
   const fetchSubjects = (className) => {
     setLoading(true);
     setError(null);
-    fetch(`http://127.0.0.1:8000/mock_subjects?class_name=${className}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch subjects");
-        return res.json();
-      })
+    fastAPI.get(API_CONFIG.FASTAPI.MOCK_TEST.GET_SUBJECTS(className))
       .then(data => {
         setSubjects(data.subjects || []);
         setChapters([]);
@@ -201,11 +194,7 @@ function MockTest() {
   const fetchChapters = (className, subject) => {
     setLoading(true);
     setError(null);
-    fetch(`http://127.0.0.1:8000/mock_chapters?class_name=${className}&subject=${encodeURIComponent(subject)}`)
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch chapters");
-        return res.json();
-      })
+    fastAPI.get(API_CONFIG.FASTAPI.MOCK_TEST.GET_CHAPTERS(className, subject))
       .then(data => {
         const chaptersData = Array.isArray(data.chapters) ? data.chapters : [];
         setChapters(chaptersData);
@@ -229,15 +218,17 @@ function MockTest() {
     setUserAnswers(Array(50).fill(null));
     setMockTestStartTime(Date.now()); // Start timing the mock test
     
-    fetch(
-      `http://127.0.0.1:8000/mock_test?class_name=${selectedClass}&subject=${encodeURIComponent(
-        selectedSubject
-      )}&chapter=${encodeURIComponent(chapter)}&difficulty=${difficulty}&retry=${retry}&language=${encodeURIComponent(selectedLanguage)}&num_questions=50`
-    )
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
+    const params = {
+      class_name: selectedClass,
+      subject: selectedSubject,
+      chapter: chapter,
+      difficulty: difficulty,
+      retry: retry,
+      language: selectedLanguage,
+      num_questions: 50
+    };
+    
+    fastAPI.get(API_CONFIG.FASTAPI.MOCK_TEST.GENERATE_TEST(params))
       .then(data => {
         console.log("🔍 Debug - Mock test response received:", data);
         let questions = [];

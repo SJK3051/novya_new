@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from django.db.models import Q, Avg, Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
+import requests
+import json
 
 from .models import (
     Quiz, QuizQuestion, QuizAttempt, QuizAnswer, MockTest, MockTestQuestion, MockTestAttempt, MockTestAnswer,
@@ -23,6 +25,51 @@ def get_student_registration(user):
             return None
     except StudentRegistration.DoesNotExist:
         return None
+
+def get_chapter_for_subtopic(class_name, subject, subtopic):
+    """
+    Helper function to get the chapter name for a given subtopic by calling FastAPI backend
+    """
+    try:
+        # Call FastAPI backend to get subtopics for the subject
+        fastapi_url = "http://localhost:8000/subtopics"
+        params = {
+            'class_name': class_name,
+            'subject': subject
+        }
+        
+        response = requests.get(fastapi_url, params=params, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            subtopics_data = data.get('subtopics', {})
+            
+            # Search through chapters to find which one contains this subtopic
+            for chapter_name, chapter_subtopics in subtopics_data.items():
+                if isinstance(chapter_subtopics, list):
+                    for chapter_subtopic in chapter_subtopics:
+                        # Check if the subtopic matches (case-insensitive, partial match)
+                        if subtopic.lower() in chapter_subtopic.lower() or chapter_subtopic.lower() in subtopic.lower():
+                            return chapter_name.strip()
+            
+            # If no exact match found, try to extract chapter from subtopic name
+            # For example: "Rational Number between Two Rational Numbers" might be from "Chapter 8: Rational Numbers"
+            if "rational" in subtopic.lower():
+                return "Chapter 8: Rational Numbers"
+            elif "quadrilateral" in subtopic.lower():
+                return "Chapter 3: Understanding Quadrilaterals"
+            elif "treasure" in subtopic.lower() or "education" in subtopic.lower():
+                return "Unit 1: Learning Together"
+            elif "geography" in subtopic.lower() or "imagery" in subtopic.lower():
+                return "Unit 1: Learning Together"
+            elif "files" in subtopic.lower() or "text" in subtopic.lower():
+                return "Chapter 1: Programming Language"
+            elif "cube" in subtopic.lower():
+                return "Chapter 7: Cubes and Cube Roots"
+            
+    except Exception as e:
+        print(f"Error fetching chapter for subtopic: {e}")
+    
+    return "Unknown Chapter"
 
 from .serializers import (
     QuizSerializer, QuizListSerializer, QuestionSerializer, QuestionOptionSerializer,
@@ -110,6 +157,7 @@ class StartQuizView(generics.CreateAPIView):
         ).first()
         
         if existing_attempt:
+            from rest_framework import serializers
             raise serializers.ValidationError("You already have an active attempt for this quiz")
         
         serializer.save(
@@ -402,6 +450,15 @@ def submit_mock_test_logic(request, validated_data, student_reg):
         topic_id=topic
     )
     
+    # Sanitize and validate class_name for mock tests
+    class_name = validated_data.get('class_name', '').strip()
+    if not class_name or class_name == 'undefined' or class_name == 'N/A':
+        # Try to extract class from student registration
+        if hasattr(student_reg, 'class_name') and student_reg.class_name:
+            class_name = student_reg.class_name
+        else:
+            class_name = 'Unknown Class'
+    
     # Create mock test attempt with all detailed information (same as quiz system)
     attempt = MockTestAttempt.objects.create(
         test_id=dummy_mock_test,
@@ -413,7 +470,7 @@ def submit_mock_test_logic(request, validated_data, student_reg):
         chapter=validated_data.get('chapter', ''),
         topic=validated_data.get('topic', ''),
         subtopic=validated_data.get('subtopic', ''),
-        class_name=validated_data.get('class_name', ''),
+        class_name=class_name,
         difficulty_level=validated_data.get('difficulty_level', ''),
         language=validated_data.get('language', ''),
         total_questions=validated_data.get('total_questions', 0),
@@ -534,6 +591,15 @@ def submit_quiz_attempt(request):
         quiz_data_json = json.dumps(quiz_questions) if quiz_questions else ''
         answers_json = json.dumps(user_answers) if user_answers else ''
         
+        # Sanitize and validate class_name
+        class_name = validated_data.get('class_name', '').strip()
+        if not class_name or class_name == 'undefined' or class_name == 'N/A':
+            # Try to extract class from student registration
+            if hasattr(student_reg, 'class_name') and student_reg.class_name:
+                class_name = student_reg.class_name
+            else:
+                class_name = 'Unknown Class'
+        
         # Create quiz attempt
         attempt = QuizAttempt.objects.create(
             student_id=student_reg,
@@ -542,7 +608,7 @@ def submit_quiz_attempt(request):
             chapter=validated_data.get('chapter', ''),
             topic=validated_data.get('topic', ''),
             subtopic=validated_data['subtopic'],
-            class_name=validated_data['class_name'],
+            class_name=class_name,
             difficulty_level=validated_data['difficulty_level'],
             language=validated_data['language'],
             total_questions=validated_data['total_questions'],
@@ -837,12 +903,24 @@ def get_recent_quiz_attempts(request):
     
     # Add quiz attempts with type indicator
     for attempt in quiz_attempts:
+        # Get proper chapter name based on subtopic
+        class_name = attempt.class_name or 'Unknown Class'
+        subject = attempt.subject or 'Unknown Subject'
+        subtopic = attempt.subtopic or 'Unknown Topic'
+        
+        # Try to get chapter from database first, then from FastAPI mapping
+        chapter_name = attempt.chapter
+        if not chapter_name or chapter_name.strip() == '':
+            chapter_name = get_chapter_for_subtopic(class_name, subject, subtopic)
+        
         all_attempts.append({
             'attempt_id': attempt.attempt_id,
             'type': 'quiz',
             'quiz_type': attempt.quiz_type,
-            'subject': attempt.subject,
-            'subtopic': attempt.subtopic,
+            'class_name': class_name,
+            'subject': subject,
+            'chapter': chapter_name,
+            'subtopic': subtopic,
             'score': attempt.score,
             'attempted_at': attempt.attempted_at,
             'completion_percentage': getattr(attempt, 'completion_percentage', None)
@@ -854,8 +932,9 @@ def get_recent_quiz_attempts(request):
             'attempt_id': attempt.attempt_id,
             'type': 'mock_test',
             'quiz_type': 'mock_test',
-            'subject': 'Mock Test',  # Default subject for mock tests
-            'subtopic': attempt.test_id.title if attempt.test_id else 'Mock Test',
+            'class_name': getattr(attempt, 'class_name', None) or 'Unknown Class',
+            'subject': getattr(attempt, 'subject', None) or 'Mock Test',
+            'subtopic': getattr(attempt, 'subtopic', None) or (attempt.test_id.title if attempt.test_id else 'Mock Test'),
             'score': attempt.score,
             'attempted_at': attempt.attempted_at,
             'completion_percentage': None
@@ -865,7 +944,121 @@ def get_recent_quiz_attempts(request):
     all_attempts.sort(key=lambda x: x['attempted_at'], reverse=True)
     all_attempts = all_attempts[:limit]
     
-    return Response(all_attempts)
+    return Response({
+        'attempts': all_attempts,
+        'total_count': len(all_attempts),
+        'quiz_count': len([a for a in all_attempts if a['type'] == 'quiz']),
+        'mock_test_count': len([a for a in all_attempts if a['type'] == 'mock_test'])
+    })
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_child_quiz_attempts(request):
+    """
+    Get quiz and mock test attempts for parent's linked child
+    """
+    user = request.user
+    
+    if user.role != 'Parent':
+        return Response({'error': 'Access denied. Only parent users can access this endpoint.'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    limit = request.query_params.get('limit', 50)
+    try:
+        limit = int(limit)
+    except ValueError:
+        limit = 50
+    
+    try:
+        # Get parent registration
+        from authentication.models import ParentRegistration
+        parent_registration = ParentRegistration.objects.get(parent_username=user.username)
+        
+        # Find student(s) linked to this parent via parent_email
+        from authentication.models import StudentRegistration
+        student_registrations = StudentRegistration.objects.filter(parent_email=parent_registration.email)
+        
+        if not student_registrations.exists():
+            return Response({'error': 'No child found linked to this parent account.'}, 
+                           status=status.HTTP_404_NOT_FOUND)
+        
+        # For now, get the first student (can be extended for multiple children)
+        student_reg = student_registrations.first()
+        
+        # Get both quiz attempts and mock test attempts for the child
+        quiz_attempts = QuizAttempt.objects.filter(
+            student_id=student_reg
+        ).order_by('-attempted_at')
+        
+        mock_test_attempts = MockTestAttempt.objects.filter(
+            student_id=student_reg
+        ).order_by('-attempted_at')
+        
+        # Combine and sort by attempted_at, then limit
+        all_attempts = []
+        
+        # Add quiz attempts with type indicator
+        for attempt in quiz_attempts:
+            # Get proper chapter name based on subtopic
+            class_name = attempt.class_name or 'Unknown Class'
+            subject = attempt.subject or 'Unknown Subject'
+            subtopic = attempt.subtopic or 'Unknown Topic'
+            
+            # Try to get chapter from database first, then from FastAPI mapping
+            chapter_name = attempt.chapter
+            if not chapter_name or chapter_name.strip() == '':
+                chapter_name = get_chapter_for_subtopic(class_name, subject, subtopic)
+            
+            all_attempts.append({
+                'attempt_id': attempt.attempt_id,
+                'type': 'quiz',
+                'quiz_type': attempt.quiz_type,
+                'class_name': class_name,
+                'subject': subject,
+                'chapter': chapter_name,
+                'subtopic': subtopic,
+                'score': attempt.score,
+                'attempted_at': attempt.attempted_at,
+                'completion_percentage': getattr(attempt, 'completion_percentage', None)
+            })
+        
+        # Add mock test attempts with type indicator
+        for attempt in mock_test_attempts:
+            all_attempts.append({
+                'attempt_id': attempt.attempt_id,
+                'type': 'mock_test',
+                'quiz_type': 'mock_test',
+                'class_name': getattr(attempt, 'class_name', None) or 'Unknown Class',
+                'subject': getattr(attempt, 'subject', None) or 'Mock Test',
+                'subtopic': getattr(attempt, 'subtopic', None) or (attempt.test_id.title if attempt.test_id else 'Mock Test'),
+                'score': attempt.score,
+                'attempted_at': attempt.attempted_at,
+                'completion_percentage': None
+            })
+        
+        # Sort by attempted_at (most recent first) and limit
+        all_attempts.sort(key=lambda x: x['attempted_at'], reverse=True)
+        all_attempts = all_attempts[:limit]
+        
+        return Response({
+            'attempts': all_attempts,
+            'total_count': len(all_attempts),
+            'quiz_count': len([a for a in all_attempts if a['type'] == 'quiz']),
+            'mock_test_count': len([a for a in all_attempts if a['type'] == 'mock_test']),
+            'child_info': {
+                'student_name': f"{student_reg.first_name} {student_reg.last_name}",
+                'student_username': student_reg.student_username,
+                'class_name': getattr(student_reg, 'class_name', 'Unknown Class')
+            }
+        })
+        
+    except ParentRegistration.DoesNotExist:
+        return Response({'error': 'Parent registration not found.'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'error': f'Failed to fetch child quiz attempts: {str(e)}'}, 
+                       status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])

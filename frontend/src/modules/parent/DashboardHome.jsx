@@ -5,8 +5,77 @@ import {
    HiOutlineClipboardDocumentList,
   HiOutlineAcademicCap
 } from 'react-icons/hi2';
+import { useState, useEffect } from 'react';
+import { API_CONFIG, djangoAPI } from '../../config/api';
  
 const DashboardHome = ({ parentName }) => {
+  const [progressData, setProgressData] = useState({
+    overallScore: 0,
+    totalTests: 0,
+    loading: true
+  });
+
+  // Fetch progress data
+  useEffect(() => {
+    const fetchProgressData = async () => {
+      try {
+        console.log('🔍 Debug - Fetching progress data for dashboard...');
+        
+        // Check if we have cached data
+        const cachedData = localStorage.getItem('progressData');
+        const lastFetch = localStorage.getItem('progressDataLastFetch');
+        const now = Date.now();
+        
+        if (cachedData && lastFetch && (now - parseInt(lastFetch)) < 300000) {
+          console.log('🔍 Debug - Using cached progress data for dashboard');
+          const parsedData = JSON.parse(cachedData);
+          const allAttempts = [...(parsedData.quizData || []), ...(parsedData.mockTestData || [])];
+          const totalTests = allAttempts.length;
+          const totalScore = allAttempts.reduce((sum, attempt) => sum + attempt.score, 0);
+          const overallScore = totalTests > 0 ? Math.round(totalScore / totalTests) : 0;
+          
+          setProgressData({
+            overallScore,
+            totalTests,
+            loading: false
+          });
+          return;
+        }
+        
+        const response = await djangoAPI.get(API_CONFIG.DJANGO.QUIZZES.CHILD_ATTEMPTS);
+        console.log('🔍 Debug - Dashboard progress response:', response);
+        
+        if (response && response.attempts) {
+          const allAttempts = response.attempts;
+          const totalTests = allAttempts.length;
+          const totalScore = allAttempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0);
+          const overallScore = totalTests > 0 ? Math.round(totalScore / totalTests) : 0;
+          
+          setProgressData({
+            overallScore,
+            totalTests,
+            loading: false
+          });
+        } else {
+          setProgressData({
+            overallScore: 0,
+            totalTests: 0,
+            loading: false
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error fetching progress data for dashboard:', error);
+        setProgressData({
+          overallScore: 0,
+          totalTests: 0,
+          loading: false
+        });
+      }
+    };
+
+    fetchProgressData();
+  }, []);
+
   return (
     <div className="dashboard-home">
       <div className="welcome-section">
@@ -47,9 +116,11 @@ const DashboardHome = ({ parentName }) => {
               <FiTrendingUp />
             </div>
             <div className="stat-content">
-              <div className="stat-value">85%</div>
+              <div className="stat-value">
+                {progressData.loading ? '...' : `${progressData.overallScore}%`}
+              </div>
               <div className="stat-label">Overall Progress</div>
-              <div className="stat-change positive">+5% this week</div>
+              <div className="stat-change positive">From Progress data</div>
             </div>
           </div>
  
@@ -80,9 +151,11 @@ const DashboardHome = ({ parentName }) => {
               <HiOutlineAcademicCap />
             </div>
             <div className="stat-content">
-              <div className="stat-value">8/10</div>
-              <div className="stat-label">Assignments</div>
-              <div className="stat-change neutral">2 pending</div>
+              <div className="stat-value">
+                {progressData.loading ? '...' : progressData.totalTests}
+              </div>
+              <div className="stat-label">Quizzes</div>
+              <div className="stat-change neutral">From Progress data</div>
             </div>
           </div>
         </div>

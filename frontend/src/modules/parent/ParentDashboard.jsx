@@ -2164,6 +2164,13 @@ const ParentDashboard = () => {
   const mainContentRef = useRef(null);
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  
+  // Progress data state
+  const [progressData, setProgressData] = useState({
+    overallScore: 0,
+    totalTests: 0,
+    loading: true
+  });
  
   const { t, i18n } = useTranslation();
 
@@ -2290,6 +2297,67 @@ const ParentDashboard = () => {
       localStorage.setItem('themePreference', 'light');
     }
   }, [darkMode]);
+
+  // Fetch progress data for dashboard
+  useEffect(() => {
+    const fetchProgressData = async () => {
+      try {
+        console.log('🔍 Debug - Fetching progress data for dashboard...');
+        
+        // Check if we have cached data
+        const cachedData = localStorage.getItem('progressData');
+        const lastFetch = localStorage.getItem('progressDataLastFetch');
+        const now = Date.now();
+        
+        if (cachedData && lastFetch && (now - parseInt(lastFetch)) < 300000) {
+          console.log('🔍 Debug - Using cached progress data for dashboard');
+          const parsedData = JSON.parse(cachedData);
+          const allAttempts = [...(parsedData.quizData || []), ...(parsedData.mockTestData || [])];
+          const totalTests = allAttempts.length;
+          const totalScore = allAttempts.reduce((sum, attempt) => sum + attempt.score, 0);
+          const overallScore = totalTests > 0 ? Math.round(totalScore / totalTests) : 0;
+          
+          setProgressData({
+            overallScore,
+            totalTests,
+            loading: false
+          });
+          return;
+        }
+        
+        const response = await djangoAPI.get(API_CONFIG.DJANGO.QUIZZES.CHILD_ATTEMPTS);
+        console.log('🔍 Debug - Dashboard progress response:', response);
+        
+        if (response && response.attempts) {
+          const allAttempts = response.attempts;
+          const totalTests = allAttempts.length;
+          const totalScore = allAttempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0);
+          const overallScore = totalTests > 0 ? Math.round(totalScore / totalTests) : 0;
+          
+          setProgressData({
+            overallScore,
+            totalTests,
+            loading: false
+          });
+        } else {
+          setProgressData({
+            overallScore: 0,
+            totalTests: 0,
+            loading: false
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error fetching progress data for dashboard:', error);
+        setProgressData({
+          overallScore: 0,
+          totalTests: 0,
+          loading: false
+        });
+      }
+    };
+
+    fetchProgressData();
+  }, []);
 
   // Update notifications when language changes
   useEffect(() => {
@@ -2526,9 +2594,10 @@ const ParentDashboard = () => {
                     <FiTrendingUp />
                   </div>
                   <div className="stat-content">
-                    <div className="stat-value">85%</div>
+                    <div className="stat-value">
+                      {progressData.loading ? '...' : `${progressData.overallScore}%`}
+                    </div>
                     <div className="stat-label">{t('stats.overallProgress')}</div>
-                    <div className="stat-change positive">+5% {t('stats.thisWeek')}</div>
                   </div>
                 </div>
 
@@ -2559,9 +2628,10 @@ const ParentDashboard = () => {
                     <HiOutlineAcademicCap />
                   </div>
                   <div className="stat-content">
-                    <div className="stat-value">8/10</div>
+                    <div className="stat-value">
+                      {progressData.loading ? '...' : progressData.totalTests}
+                    </div>
                     <div className="stat-label">Quizzes</div>
-                    <div className="stat-change neutral">2 {t('stats.pending')}</div>
                   </div>
                 </div>
               </div>

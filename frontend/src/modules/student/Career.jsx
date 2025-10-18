@@ -95,19 +95,78 @@ const Career = () => {
         console.log('🔍 Debug - Token preview:', token ? token.substring(0, 50) + '...' : 'No token');
         
         console.log('🔍 Debug - Starting API calls...');
-        const [performanceRes, statisticsRes, recentAttemptsRes] = await Promise.all([
-          getStudentPerformance(),
-          getQuizStatistics(),
-          getRecentQuizAttempts(10)
-        ]);
+        // Use only the working endpoint to avoid loading issues
+        const recentAttemptsRes = await getRecentQuizAttempts(10);
         
         console.log('🔍 Debug - API responses received:');
-        console.log('🔍 Debug - Performance data:', performanceRes);
-        console.log('🔍 Debug - Statistics data:', statisticsRes);
         console.log('🔍 Debug - Recent attempts data:', recentAttemptsRes);
         
-        setQuizPerformanceData(performanceRes);
-        setQuizStatisticsData(statisticsRes);
+        if (recentAttemptsRes && recentAttemptsRes.attempts) {
+          console.log('🔍 Debug - Individual attempt details:');
+          recentAttemptsRes.attempts.forEach((attempt, index) => {
+            console.log(`🔍 Debug - Attempt ${index}:`, {
+              type: attempt.type,
+              total_questions: attempt.total_questions,
+              score: attempt.score,
+              subject: attempt.subject,
+              subtopic: attempt.subtopic
+            });
+          });
+        }
+        
+        // Calculate performance data from recent attempts
+        if (recentAttemptsRes && recentAttemptsRes.attempts) {
+          const attempts = recentAttemptsRes.attempts;
+          
+          // Calculate quiz performance
+          const quizAttempts = attempts.filter(attempt => attempt.type === 'quiz');
+          const quizScores = quizAttempts.map(attempt => attempt.score || 0);
+          const quizAvg = quizScores.length > 0 ? quizScores.reduce((sum, score) => sum + score, 0) / quizScores.length : 0;
+          
+          // Calculate total questions from quiz attempts
+          const quizTotalQuestions = quizAttempts.reduce((sum, attempt) => sum + (attempt.total_questions || 0), 0);
+          console.log('🔍 Debug - Quiz total questions calculation:', {
+            quizAttempts: quizAttempts.length,
+            individualQuestions: quizAttempts.map(a => a.total_questions),
+            totalQuestions: quizTotalQuestions
+          });
+          
+          // Calculate mock test performance
+          const mockTestAttempts = attempts.filter(attempt => attempt.type === 'mock_test');
+          const mockTestScores = mockTestAttempts.map(attempt => attempt.score || 0);
+          const mockTestAvg = mockTestScores.length > 0 ? mockTestScores.reduce((sum, score) => sum + score, 0) / mockTestScores.length : 0;
+          
+          // Calculate total questions from mock test attempts
+          const mockTestTotalQuestions = mockTestAttempts.reduce((sum, attempt) => sum + (attempt.total_questions || 0), 0);
+          console.log('🔍 Debug - Mock test total questions calculation:', {
+            mockTestAttempts: mockTestAttempts.length,
+            individualQuestions: mockTestAttempts.map(a => a.total_questions),
+            totalQuestions: mockTestTotalQuestions
+          });
+          
+          // Create performance data object
+          const performanceData = {
+            quiz_average_score: quizAvg,
+            mock_test_average_score: mockTestAvg,
+            total_quizzes_attempted: quizAttempts.length,
+            total_mock_tests_attempted: mockTestAttempts.length,
+            total_questions_answered: quizTotalQuestions,
+            mock_test_questions_answered: mockTestTotalQuestions,
+            overall_average_score: (quizAvg + mockTestAvg) / 2
+          };
+          
+          // Create statistics data object
+          const statisticsData = {
+            total_attempts: attempts.length,
+            quiz_count: quizAttempts.length,
+            mock_test_count: mockTestAttempts.length,
+            average_score: performanceData.overall_average_score
+          };
+          
+          setQuizPerformanceData(performanceData);
+          setQuizStatisticsData(statisticsData);
+        }
+        
         setRecentQuizAttempts(recentAttemptsRes?.attempts || []);
       } catch (error) {
         console.error('❌ Error fetching quiz data:', error);
@@ -117,6 +176,7 @@ const Career = () => {
         setRecentQuizAttempts([]);
       } finally {
         setLoadingQuizData(false);
+        console.log('🔍 Debug - Loading completed, loadingQuizData set to false');
       }
     };
 

@@ -922,6 +922,8 @@ def get_recent_quiz_attempts(request):
             'chapter': chapter_name,
             'subtopic': subtopic,
             'score': attempt.score,
+            'total_questions': attempt.total_questions,
+            'correct_answers': attempt.correct_answers,
             'attempted_at': attempt.attempted_at,
             'completion_percentage': getattr(attempt, 'completion_percentage', None)
         })
@@ -936,6 +938,8 @@ def get_recent_quiz_attempts(request):
             'subject': getattr(attempt, 'subject', None) or 'Mock Test',
             'subtopic': getattr(attempt, 'subtopic', None) or (attempt.test_id.title if attempt.test_id else 'Mock Test'),
             'score': attempt.score,
+            'total_questions': attempt.total_questions,
+            'correct_answers': getattr(attempt, 'correct_answers', None),
             'attempted_at': attempt.attempted_at,
             'completion_percentage': None
         })

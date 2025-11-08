@@ -1,0 +1,52 @@
+# =========================
+# BACKEND .gitignore
+# =========================
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdm
+*.egg-info/
+*.egg
+
+# Django
+db.sqlite3
+/staticfiles/
+media/
+*.log
+*.pot
+*.mo
+
+# Environment files
+.env
+.env.local
+*.env
+
+# Migrations (optional, if auto-generated)
+*/migrations/__pycache__/
+*/migrations/*.pyc
+*/migrations/*.py~
+
+# Docker / Celery / Redis
+celerybeat-schedule
+celerybeat.pid
+*.pid
+*.sock
+*.tar
+
+# Logs
+logs/
+*.log
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS junk
+.DS_Store
+Thumbs.db
+

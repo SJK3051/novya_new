@@ -27,17 +27,17 @@ class AssignmentAdmin(admin.ModelAdmin):
     raw_id_fields = ('assigned_by', 'subject')
     filter_horizontal = ('assigned_to',)
 
+# Remove __ lookups in list_filter that may not exist
+# e.g., change 'assignment__subject' to 'assignment' if subject field is not directly accessible
 
 @admin.register(AssignmentSubmission)
 class AssignmentSubmissionAdmin(admin.ModelAdmin):
-    """
-    Admin configuration for AssignmentSubmission model
-    """
     list_display = ('assignment', 'student', 'submitted_at', 'marks_obtained', 'graded_by', 'graded_at')
-    list_filter = ('submitted_at', 'graded_at', 'assignment__subject')
+    list_filter = ('submitted_at', 'graded_at')  # removed assignment__subject
     search_fields = ('assignment__title', 'student__username')
     raw_id_fields = ('assignment', 'student', 'graded_by')
     readonly_fields = ('submitted_at', 'graded_at')
+
 
 
 @admin.register(Grade)

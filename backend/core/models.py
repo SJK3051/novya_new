@@ -2,9 +2,6 @@
 # This file can be used for any core functionality that doesn't fit into specific apps
 
 from django.db import models
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 
 class SystemSettings(models.Model):
@@ -17,10 +14,10 @@ class SystemSettings(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.key}: {self.value}"
-    
+
     class Meta:
         db_table = 'system_settings'
         verbose_name = 'System Setting'
@@ -39,8 +36,9 @@ class AuditLog(models.Model):
         ('logout', 'Logout'),
         ('view', 'View'),
     ]
-    
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+
+    # Use string reference instead of direct User model import
+    user = models.ForeignKey('authentication.User', on_delete=models.SET_NULL, null=True, blank=True)
     action = models.CharField(max_length=20, choices=ACTION_TYPES)
     model_name = models.CharField(max_length=100)
     object_id = models.PositiveIntegerField(blank=True, null=True)
@@ -48,10 +46,11 @@ class AuditLog(models.Model):
     ip_address = models.GenericIPAddressField(blank=True, null=True)
     user_agent = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
-        return f"{self.user} - {self.action} - {self.model_name}"
-    
+        username = self.user.username if self.user else "Anonymous"
+        return f"{username} - {self.action} - {self.model_name}"
+
     class Meta:
         db_table = 'audit_logs'
         ordering = ['-timestamp']

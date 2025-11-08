@@ -1,5 +1,5 @@
+# courses/models.py
 from django.db import models
-from authentication.models import Class
 
 
 class Course(models.Model):
@@ -111,7 +111,7 @@ class Chapter(models.Model):
     """
     Chapter model for backward compatibility
     """
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='chapters')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='chapters')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     chapter_number = models.PositiveIntegerField()
@@ -167,7 +167,7 @@ class CourseEnrollment(models.Model):
     Course enrollment model
     """
     student = models.ForeignKey('authentication.Student', on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
     enrolled_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     last_accessed = models.DateTimeField(null=True, blank=True)
@@ -216,7 +216,7 @@ class CourseMaterial(models.Model):
         ('link', 'Link'),
     ]
     
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='materials')
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='materials')
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, null=True)
     material_type = models.CharField(max_length=20, choices=MATERIAL_TYPES)
